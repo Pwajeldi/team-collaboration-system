@@ -1,0 +1,70 @@
+.kanban-column {
+    background: #f5f6fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 2px;
+}
+
+.kanban-column-header h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.kanban-column-header span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.kanban-column-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.kanban-column-empty {
+    font-size: 12px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+/* per-column accent, matched to your status-badge color language from tasksPage.css */
+.kanban-column[data-status="NotStarted"] .kanban-column-header span {
+    background: #F1EFE8;
+    color: #5F5E5A;
+}
+.kanban-column[data-status="InProgress"] .kanban-column-header span {
+    background: #E3E8FC;
+    color: #2F3E9E;
+}
+.kanban-column[data-status="InReview"] .kanban-column-header span {
+    background: #FCEEDA;
+    color: #7A4A0A;
+}
+.kanban-column[data-status="Completed"] .kanban-column-header span {
+    background: #EAF3DE;
+    color: #27500A;
+}

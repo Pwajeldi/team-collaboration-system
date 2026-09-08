@@ -1,0 +1,34 @@
+.profile-page{
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-areas:
+     "base-profile editable-profile"
+    ;
+    padding: 1rem;
+    gap: 20px;
+}
+
+.base-profile{
+    grid-area: base-profile;
+    background: var(--color-surface);
+    min-height: 0;
+    overflow: hidden; 
+    display: flex;
+    border-radius: 12px;
+    flex-direction: column;
+}
+
+.editable-profile{
+    grid-area: editable-profile;
+    background: var(--color-surface); 
+    min-height: 0;
+    overflow: hidden; 
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    border-radius: 12px;
+}
+
+.profile-picture{
+    border-radius: 50%;
+}

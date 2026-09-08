@@ -1,0 +1,23 @@
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.action-btn:hover {
+    background: #f0f0f8;
+    color: #464881;
+}
+
+.action-btn svg {
+    width: 16px;
+    height: 16px;
+}

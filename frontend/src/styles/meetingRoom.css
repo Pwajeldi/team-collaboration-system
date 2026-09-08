@@ -1,0 +1,99 @@
+.meeting-room {
+    position: fixed;
+    inset: 0;
+    background: #111827;
+    display: flex;
+    flex-direction: column;
+    z-index: 200;
+}
+
+.meeting-room-error {
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    gap: 1rem;
+}
+
+.meeting-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    align-content: center;
+}
+
+.meeting-tile {
+    position: relative;
+    background: #1f2937;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+}
+
+.meeting-tile video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.meeting-tile-name {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.meeting-tile-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.meeting-tile.reconnecting {
+    outline: 2px solid #d97706;
+}
+
+.meeting-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+}
+
+.meeting-control-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: #374151;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.meeting-control-btn:hover {
+    background: #4b5563;
+}
+
+.meeting-control-btn.off,
+.meeting-control-btn.leave {
+    background: #dc2626;
+}
+
+.meeting-control-btn.leave:hover {
+    background: #b91c1c;
+}

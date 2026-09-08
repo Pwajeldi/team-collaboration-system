@@ -1,0 +1,40 @@
+.layout {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    grid-template-rows: 60px 1fr;
+    grid-template-areas:
+        "sidebar main"
+        "sidebar main";
+    height: 100vh;
+    transition: grid-template-columns 0.2s ease;
+}
+
+.layout-sidebar {
+    grid-area: sidebar;
+    background: var(--color-sidebar);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    overflow: hidden;
+    transition: padding 0.2s ease;
+}
+
+.layout.sidebar-collapsed{
+    grid-template-columns: 76px 1fr;
+}
+
+.layout-main {
+    grid-area: main;
+    background: var(--color-background); 
+    min-height: 0;
+    overflow: hidden; 
+    display: flex; 
+    flex-direction: column;
+}
+
+.sidebar{
+    width: 100%;
+}
