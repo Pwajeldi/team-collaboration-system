@@ -2,27 +2,28 @@ import { useMemo, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { X, Search } from "lucide-react";
-import toast from "react-hot-toast";
-import { useCreateEvent } from "../hooks/calendarHook";
+import {  useUpdateEvent } from "../hooks/calendarHook";
 import "../styles/eventFormModal.css";
 import { useGetUsers } from "../hooks/memberHook";
+import type { EventResponse, UpdateEventDto } from "../types/types";
+import toast from "react-hot-toast";
 
 type EventFormModalProps = {
-    initialStart?: string;
-    initialEnd?: string;
+    event: EventResponse,
     onClose: () => void;
-    onSuccess: () => void;
 };
 
-const eventSchema = z.object({
-    title: z.string().min(2, "Title is too short"),
-    description: z.string(),
-    location: z.string(),
+const updateEventSchema = z.object({
+    eventId: z.string(),
+    userIds: z.array(z.string()),
+    eventDescription: z.string(),
     start: z.string().min(1, "Start time is required"),
     end: z.string().min(1, "End time is required"),
-    attendeeIds: z.array(z.string()),
+    location: z.string(),
+    title: z.string(),
     isMeeting: z.boolean(),
-}).refine((data) => new Date(data.end) > new Date(data.start), {
+    })
+    .refine((data) => new Date(data.end) > new Date(data.start), {
     message: "End time must be after start time",
     path: ["end"],
 });
@@ -35,36 +36,48 @@ const toLocalInputValue = (iso?: string) => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventFormModalProps) => {
+const UpdateEventModal = ({ event, onClose}: EventFormModalProps) => {
     const usersQuery = useGetUsers();
-    const createEvent = useCreateEvent();
+    const updateEvent = useUpdateEvent();
     const [attendeeSearch, setAttendeeSearch] = useState("");
+
+    console.log("Event:", event);
+    console.log("Attendees:", event.attendees);
+    console.log(
+    "Mapped user IDs:",
+    event.attendees.map(a => a.userId)
+);
 
     const form = useForm({
         defaultValues: {
-            title: "",
-            description: "",
-            location: "",
-            start: toLocalInputValue(initialStart),
-            end: toLocalInputValue(initialEnd),
-            attendeeIds: [] as string[],
-            isMeeting: false,
+            eventId: event.id,
+            eventDescription: event.description ?? "",
+            start: toLocalInputValue(event.start),
+            end: toLocalInputValue(event.end),
+            userIds: event.attendees.map(a => a.userId) as string[],
+            location: event.location ?? "",
+            title:  event.title ?? "",
+            isMeeting: event.isMeeting,
         },
-        validators: { onSubmit: eventSchema },
+        validators: { onSubmit: updateEventSchema },
+        onSubmitInvalid: ({formApi}) => {
+            console.log("Form is invalid");
+            console.log(formApi.state.errorMap)
+        },
         onSubmit: async ({ value }) => {
-            const payload = {
-                title: value.title,
+            console.log("Handling event update...")
+            const payload: UpdateEventDto = {
+                eventId: value.eventId,
+                eventDescription: value.eventDescription?.trim(),
+                userIds: value.userIds,
                 start: new Date(value.start).toISOString(),
                 end: new Date(value.end).toISOString(),
-                attendeeIds: value.attendeeIds,
-                ...(value.description.trim() && { description: value.description.trim() }),
-                ...(value.location.trim() && { location: value.location.trim() }),
+                location: value.location,
+                title: value.title,
                 isMeeting: value.isMeeting,
             };
-
-            const created = await createEvent.mutateAsync(payload);
-
-            const conflicted = created.attendees.filter((a) => a.hadOverlapAtCreation);
+            const updated = await updateEvent.mutateAsync(payload);
+            const conflicted = updated.attendees.filter((a) => a.hadOverlapAtCreation);
             if (conflicted.length > 0) {
                 toast(
                     `Heads up: ${conflicted.map((a) => a.fullName).join(", ")} ${conflicted.length === 1 ? "has" : "have"} a scheduling conflict.`,
@@ -72,28 +85,33 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                 );
             }
 
-            onSuccess();
+            onClose();
         },
     });
 
     const filteredAttendees = useMemo(() => {
         const list = usersQuery.data ?? [];
         if (!attendeeSearch.trim()) return list;
-        const q = attendeeSearch.toLowerCase();
-        return list.filter((u) => u.fullName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+        const search = attendeeSearch.toLowerCase();
+        return list.filter((u) => u.fullName.toLowerCase().includes(search) || u.email.toLowerCase().includes(search));
     }, [usersQuery.data, attendeeSearch]);
 
     return (
         <div className="event-modal-overlay" onClick={onClose}>
             <div className="event-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="event-modal-header">
-                    <h3>Create Event</h3>
+                    <h3>Update Event</h3>
                     <button className="event-modal-close" onClick={onClose} aria-label="Close">
                         <X size={18} />
                     </button>
                 </div>
 
-                <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}>
+                <form onSubmit={(e) => { 
+                    e.preventDefault();
+                    e.stopPropagation(); 
+                    form.handleSubmit(); 
+                    }}
+                    >
                     <div className="event-form-group">
                         <label htmlFor="title">Title</label>
                         <form.Field name="title">
@@ -114,11 +132,11 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                     </div>
 
                     <div className="event-form-group">
-                        <label htmlFor="description">Description</label>
-                        <form.Field name="description">
+                        <label htmlFor="eventDescription">Description</label>
+                        <form.Field name="eventDescription">
                             {(field) => (
                                 <textarea
-                                    id="description"
+                                    id="eventDescription"
                                     rows={3}
                                     value={field.state.value}
                                     onChange={(e) => field.handleChange(e.target.value)}
@@ -161,6 +179,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                                 )}
                             </form.Field>
                         </div>
+
                         <div className="event-form-group">
                             <label htmlFor="end">End</label>
                             <form.Field name="end">
@@ -181,7 +200,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                         </div>
                     </div>
 
-                    <div className="event-form-group">
+                     <div className="event-form-group">
                         <label className="event-checkbox-label">
                             <form.Field name="isMeeting">
                                 {(field) => (
@@ -198,7 +217,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
 
                     <div className="event-form-group">
                         <label>Attendees</label>
-                        <form.Field name="attendeeIds">
+                        <form.Field name="userIds">
                             {(field) => {
                                 const selectedUsers = (usersQuery.data ?? []).filter((u) =>
                                     field.state.value.includes(u.userId)
@@ -265,8 +284,8 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                         <button type="button" className="event-btn-secondary" onClick={onClose}>
                             Cancel
                         </button>
-                        <button type="submit" className="event-btn-primary" disabled={createEvent.isPending}>
-                            {createEvent.isPending ? "Creating…" : "Create Event"}
+                        <button type="submit" className="event-btn-primary" disabled={updateEvent.isPending}>
+                            {updateEvent.isPending ? "Updating..." : "Update Event"}
                         </button>
                     </div>
                 </form>
@@ -275,4 +294,4 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
     );
 };
 
-export default EventFormModal;
+export default UpdateEventModal;

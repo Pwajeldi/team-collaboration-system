@@ -1,14 +1,12 @@
 import { Search } from "lucide-react";
-import { useChat } from "../contexts/chatContext";
 import { useGetUsers } from "../hooks/memberHook";
-import { getInitials } from "../services/getInitials";
 import "../styles/userList.css";
 import Loader from "./loader";
 import { useEffect, useState } from "react";
+import UserListItem from "./userListItem";
 
 
 const UserList = () => {  
-    const {selectedUser, setSelectedUser} = useChat();
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [showSearchInput, setShowSearchInput] = useState(false);
@@ -45,26 +43,19 @@ const UserList = () => {
                     <span>Chat</span>
                     <button onClick={toggleSearchInput}>{<Search size={17}/>}</button>
                 </div>
-                    <div className={`user-list-header-input ${showSearchInput ? "show" : ""}`}>
-                        <input 
-                        onChange={handleSearchChange}
-                        value={debouncedSearchTerm}
-                        type="text" placeholder="Search users..." />
-                    </div>
+                
+                <div className={`user-list-header-input ${showSearchInput ? "show" : ""}`}>
+                    <input 
+                    onChange={handleSearchChange}
+                    value={debouncedSearchTerm}
+                    type="text" placeholder="Search users..." />
+                </div>
             </div>
 
             <div className="user-list-scroll">
                 {query.data?.map(user => {
                     return(
-                    <button
-                        key={user.userId}
-                        className={`user-list-item ${selectedUser?.userId === user.userId ? "active" : ""}`}
-                        onClick={() => setSelectedUser({userId:user.userId, fullName: user.fullName})}
-                    >
-                        <span className="avatar">{getInitials(user.fullName)}</span>
-                        <span className="user-name">{user.fullName}</span>
-                        {user.unreadMessages > 0 && <span className="unread-badge">{user.unreadMessages > 20 ? "20+" : user.unreadMessages}</span>}
-                    </button>
+                    <UserListItem key={user.userId} user={user}/>
                 )
                 })}
             </div>

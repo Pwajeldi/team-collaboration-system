@@ -1,5 +1,6 @@
 import  api  from "./axios";
-import type { CreateEventDto, EventResponse, UpdateEventDto } from "../types/types";
+import type { CreateEventDto, EventResponse, UpdateEventDto, UpdateEventTimeDto } from "../types/types";
+import axios from "axios";
 
 export const fetchEvents = async() => {
     const response = await api.get<EventResponse[]>("calendar/events");
@@ -22,6 +23,21 @@ export const deleteEvent = async(id: string) => {
 }
 
 export const updateEvent = async(event: UpdateEventDto) => {
-    const {data} = await api.put(`/calendar/event/update`, event);
+    const {data} = await api.put<EventResponse>(`/calendar/event/update`, event);
     return data;
+}
+
+export const updateEventDuration = async(eventDto: UpdateEventTimeDto) => {
+    try{
+        const response = await api.put<string>(`/calendar/update-duration`, eventDto);
+        return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+        }
+    }  
 }

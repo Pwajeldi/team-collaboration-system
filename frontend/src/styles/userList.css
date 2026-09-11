@@ -137,21 +137,35 @@
 
 .unread-badge {
     margin-left: auto;
-
-    min-width: 20px;
-    height: 20px;
+    width: 17px;
+    height: 17px;
     padding: 0 5px;
-
     display: flex;
     align-items: center;
     justify-content: center;
 
-    border-radius: 999px;
+    border-radius: 50%;
 
-    background: var(--accent-color);
-    color: rgb(103, 11, 207);
+    background: var(--color-primary);
+    color: white;
 
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     line-height: 1;
+}
+
+.avatar-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 2px solid #fff;
 }

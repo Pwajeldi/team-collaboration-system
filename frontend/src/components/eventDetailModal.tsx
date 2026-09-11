@@ -1,8 +1,10 @@
-import { X, MapPin, Clock, User, Users, Trash2, Video } from "lucide-react";
+import { X, MapPin, Clock, User, Users, Trash2, Video, Pencil } from "lucide-react";
 import type { EventResponse } from "../types/types";
 import { useDeleteEvent } from "../hooks/calendarHook";
 import "../styles/eventDetailModal.css";
 import { getUserId } from "../services/jwtdecode";
+import { useState } from "react";
+import UpdateEventModal from "./eventUpdateModal";
 
 type EventDetailModalProps = {
     event: EventResponse;
@@ -26,12 +28,26 @@ const EventDetailModal = ({ event, onClose, onDeleted, onJoinMeeting}: EventDeta
     const deleteEvent = useDeleteEvent();
     const currentUserId = getUserId();
     const isOrganizer = event.organizerId === currentUserId;
+    const [viewUpdateEventModal, setViewUpdateEventModal] = useState(false);
 
     const handleDelete = async () => {
         if (!window.confirm(`Delete "${event.title}"? This can't be undone.`)) return;
         await deleteEvent.mutateAsync(event.id);
         onDeleted();
     };
+
+    if (viewUpdateEventModal) {
+        return (
+            <UpdateEventModal
+                event={event}
+                onClose={() => {
+                    setViewUpdateEventModal(false);
+                    onClose();
+                }}
+            />
+        );
+    }
+
 
     return (
         <div className="event-detail-overlay" onClick={onClose}>
@@ -58,7 +74,7 @@ const EventDetailModal = ({ event, onClose, onDeleted, onJoinMeeting}: EventDeta
 
                     <div className="event-detail-row">
                         <User size={16} />
-                        <span>Organized by {event.organizer}</span>
+                        <span>Organized by {event.organizerName}</span>
                     </div>
 
                     {event.description && (
@@ -69,7 +85,7 @@ const EventDetailModal = ({ event, onClose, onDeleted, onJoinMeeting}: EventDeta
                         <div className="event-detail-attendees">
                             <div className="event-detail-row">
                                 <Users size={16} />
-                                <span>People: {event.attendees.join(", ")}</span>
+                                <span>People: {event.attendees.map(a => a.fullName+", ")}</span>
                             </div>
                         </div>
                     )}
@@ -77,7 +93,15 @@ const EventDetailModal = ({ event, onClose, onDeleted, onJoinMeeting}: EventDeta
                 <div className="event-detail-actions">
                     {event.isMeeting && event.meetingId && (
                     <button className="event-detail-join-btn" onClick={() => onJoinMeeting(event)}>
-                        <Video size={14} /> Join Meeting
+                        <Video size={14} />
+                    </button>
+                    )}
+                    {isOrganizer && (<button
+                        className="event-detail-edit-btn"
+                        onClick={()=>{setViewUpdateEventModal(true);}}
+                    >
+                        <Pencil size={14} />
+                        {"Edit"}
                     </button>
                     )}
                     {isOrganizer && (<button
@@ -86,11 +110,10 @@ const EventDetailModal = ({ event, onClose, onDeleted, onJoinMeeting}: EventDeta
                         disabled={deleteEvent.isPending}
                     >
                         <Trash2 size={14} />
-                        {deleteEvent.isPending ? "Deleting…" : "Delete Event"}
+                        {deleteEvent.isPending ? "Cancelling…" : "Cancel Event"}
                     </button>
                     )}
-                </div>
-                
+                </div>       
             </div>
         </div>
     );

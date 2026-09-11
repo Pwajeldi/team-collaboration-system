@@ -11,10 +11,11 @@ namespace backend.Services
     public interface ICalendarService
     {
         Task<Event> GetEvent(Guid id);
-        Task<List<CalendarEventDto>> GetEvents(TeamMember user);
+        Task<List<EventResponse>> GetEvents(TeamMember user);
         Task<Event> CreateEvent(CreateEventDto dto, string currentUserId);
         Task<Event> UpdateEvent(UpdateEventDto dto, TeamMember organizer);
         Task DeleteEvent(Guid eventId, string organizerId);
+        Task UpdateEventDuration(UpdateEventDurationDto dto, string userId);
     }
     public class CalendarService : ICalendarService
     {
@@ -33,7 +34,7 @@ namespace backend.Services
 
         public async Task<Event> CreateEvent(CreateEventDto dto, string currentUserId)
         {
-            if (dto.End < dto.Start) throw new InvalidOperationException("Unable to create event");
+            if (dto.End <= dto.Start) throw new InvalidOperationException("Unable to create event");
             var newEvent = new Event
             {
                 Id = Guid.NewGuid(),
@@ -110,7 +111,6 @@ namespace backend.Services
                     {
                         _logger.LogError(ex, "Failed to email invite to {UserId} for event {EventId}", attendee.UserId, savedEvent.Id);
                     }
-
                 }
 
                 savedEvent.NotificationsSent = true;
@@ -169,7 +169,7 @@ namespace backend.Services
             return eventEntity;
         }
 
-        public async Task<List<CalendarEventDto>> GetEvents(TeamMember user)
+        public async Task<List<EventResponse>> GetEvents(TeamMember user)
         {
             var myEvents = await _context.Events
                 .Include(e => e.Organizer)
@@ -178,7 +178,7 @@ namespace backend.Services
                     .Include(e => e.Meeting)
                 .Where(e => e.OrganizerId == user.Id
                          || e.Attendees.Any(a => a.UserId == user.Id))
-                .Select(e => new CalendarEventDto
+                .Select(e => new EventResponse
                 {
                     Id = e.Id,
                     Title = e.Title,
@@ -186,11 +186,15 @@ namespace backend.Services
                     Location = e.Location,
                     Start = e.Start,
                     End = e.End,
-                    Organizer = e.Organizer.FirstName + " " + e.Organizer.LastName,
-                    organizerId = e.OrganizerId,
-                    Attendees = e.Attendees
-                        .Select(a => a.User.FirstName + " " + a.User.LastName)
-                        .ToList(),
+                    OrganizerName = $"{e.Organizer.FirstName} {e.Organizer.LastName}",
+                    OrganizerId = e.OrganizerId,
+                    Attendees = e.Attendees.Select(a => new AttendeeResponse
+                    {
+                        UserId = a.UserId,
+                        FullName = $"{a.User.FirstName} {a.User.LastName}",
+                        HadOverlapAtCreation = a.HadOverlapAtCreation,
+                        Status = a.Status,
+                    }).ToList(),
                     IsMeeting = e.IsMeeting,
                     MeetingId = e.EventMeetingId ?? null,
                     MeetingStatus = e.Meeting != null ? e.Meeting.Status : null,
@@ -202,14 +206,14 @@ namespace backend.Services
 
         public async Task<Event> UpdateEvent(UpdateEventDto dto, TeamMember organizer)
         {
-            var eventToUpdate = await _context.Events.Where(ev => (ev.OrganizerId == organizer.Id) &&
+            var eventToUpdate = await _context.Events.Include(e => e.Attendees).Where(ev => (ev.OrganizerId == organizer.Id) &&
                            (ev.Id == dto.EventId)).FirstOrDefaultAsync();
             if (eventToUpdate is null) throw new KeyNotFoundException("No event matches the description");
 
             if (dto.Start is not null)
             {
                 if (!DateTime.TryParse(dto.Start, out var start))
-                   throw new InvalidOperationException("Enter a valid date format");
+                    throw new InvalidOperationException("Enter a valid date format");
                 eventToUpdate.Start = start;
             }
 
@@ -221,6 +225,18 @@ namespace backend.Services
                 eventToUpdate.End = end;
             }
 
+            if (!string.IsNullOrEmpty(dto.Location))
+            {
+                eventToUpdate.Location = dto.Location;
+            }
+
+            if (!string.IsNullOrEmpty(dto.Title))
+            {
+                eventToUpdate.Title = dto.Title;
+            }
+
+            eventToUpdate.IsMeeting = dto.isMeeting;
+
             if (eventToUpdate.End <= eventToUpdate.Start)
                 throw new InvalidOperationException("The end of meeting must exceed the start time");
 
@@ -229,26 +245,70 @@ namespace backend.Services
 
             if (dto.UserIds is not null)
             {
-                var attendees = await _userManager.Users.Where(u => dto.UserIds.Contains(u.Id)).ToListAsync();
-                if (attendees.Count != dto.UserIds.Count) throw new InvalidOperationException("Event must have at least one attendee");
+                if (dto.UserIds.Count == 0)
+                    throw new InvalidOperationException("Event must have at least one attendee");
+
+                var existingAttendees = eventToUpdate.Attendees.ToList();
+                var existingIds = existingAttendees.Select(a => a.UserId).ToHashSet();
+                var newIds = dto.UserIds.Distinct().Where(id => !existingIds.Contains(id)).ToList();
+                var removedIds = existingIds.Where(id => !dto.UserIds.Contains(id)).ToList();
+                var attendeesToRemove = existingAttendees.Where(a => removedIds.Contains(a.UserId)).ToList();
+                _context.EventAttendees.RemoveRange(attendeesToRemove);
 
                 var conflictedUserIds = await _context.Events
                     .Where(e => e.Id != dto.EventId)
-                .Where(e => e.Attendees.Any(a => dto.UserIds.Contains(a.UserId)))
                 .Where(e => e.Start < eventToUpdate.End && e.End > eventToUpdate.Start)
-                .SelectMany(e => e.Attendees.Select(a => a.UserId))
+                .SelectMany(e => e.Attendees)
+                .Where(a => dto.UserIds.Contains(a.UserId))
+                .Select(a => a.UserId)
+                .Distinct()
                 .ToListAsync();
                 var conflictSet = conflictedUserIds.ToHashSet();
 
-                eventToUpdate.Attendees = dto.UserIds.Select(id => new EventAttendee
+                var newAttendees = newIds.Select(id => new EventAttendee
                 {
                     UserId = id,
                     HadOverlapAtCreation = conflictSet.Contains(id),
-                }).ToList();
+                    EventId = eventToUpdate.Id,
+                });
+                await _context.EventAttendees.AddRangeAsync(newAttendees);
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    throw;
+                }
+                catch (DbUpdateException)
+                {
+                    throw;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+
             }
             await _context.SaveChangesAsync();
+
             var updatedEvent = eventToUpdate;
             return updatedEvent;
+        }
+
+        public async Task UpdateEventDuration(UpdateEventDurationDto dto, string userId)
+        {
+            var eventToUpdate = await _context.Events.FirstOrDefaultAsync(e => e.Id == dto.EventId) 
+                ?? throw new ArgumentException("Event does not exist");
+            bool isOrganizer = eventToUpdate.OrganizerId == userId;
+            if (!isOrganizer)
+                throw new UnauthorizedAccessException("Unable to perform this action");
+            if (dto.NewEndTime <= dto.NewStartTime) throw new ArgumentException("Unable to update duration");
+
+            eventToUpdate.Start = dto.NewStartTime;
+            eventToUpdate.End = dto.NewEndTime;
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("Updated time of event - {EventId}", eventToUpdate.Id);
         }
     }
 }

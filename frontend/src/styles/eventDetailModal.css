@@ -149,3 +149,22 @@
 .event-detail-join-btn:hover {
     background: #d8d2ffd0;
 }
+
+.event-detail-edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 1rem;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #374151;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.event-detail-edit-btn:hover {
+    background: var(--color-background);
+    border-color: var(--color-primary);
+}

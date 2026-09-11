@@ -4,6 +4,7 @@ import "../styles/sidebar.css"
 import { useState, useRef, useEffect } from 'react';
 import { getInitials } from '../services/getInitials';
 import { stopConnection } from "../services/signalr";
+import LogoutModal from './logoutModal';
 
 type SidebarProps = {
     isCollapsed: boolean,
@@ -11,6 +12,7 @@ type SidebarProps = {
 }
 const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
     const navigate = useNavigate();
+    const [openLogoutModal, setOpenLogoutModal] = useState(false);
     const role = (sessionStorage.getItem("role") ?? "").toLowerCase();
     const isAdmin = role === "admin";
     const isManager = role === "manager";
@@ -32,7 +34,6 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
             : 
             [{label:"Tasks", path:"/mytasks", icon:ClipboardCheck}]),
         {label:"Calendar", path:"/calendar", icon:Calendar},
-        //{label:"Settings", path:"/settings", icon:Settings},
         ...(isAdmin ? [{label:"Administrator", path:"/admin", icon:UserShield}] : []),
     ];
 
@@ -50,11 +51,9 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
     }, [])
 
     const handleLogout = async () => {
-        if(window.confirm("Logout?")){
-            await stopConnection();
-            sessionStorage.clear();
-            navigate("/");
-        }
+        await stopConnection();
+        sessionStorage.clear();
+        navigate("/");
     };
 
     return(
@@ -102,7 +101,7 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
                         <button className="sidebar-user-menu-item" onClick={() => { navigate("/myprofile"); setMenuOpen(false); }}>
                             <User size={16} className='sidebar-icon'/> {!isCollapsed && <span>My Profile</span>}
                         </button>
-                        <button className="sidebar-user-menu-item danger" onClick={handleLogout}>
+                        <button className="sidebar-user-menu-item danger" onClick={() => setOpenLogoutModal(true)}>
                             <LogOut size={16} className='sidebar-icon'/> {!isCollapsed && <span>Logout</span>}
                         </button>
                     </div>
@@ -120,6 +119,8 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
                 </button>
             </div>
         </div>
+
+        {openLogoutModal && <LogoutModal onClose={() => setOpenLogoutModal(false)} handleLogout={handleLogout}/>}
         </>
     )
 }

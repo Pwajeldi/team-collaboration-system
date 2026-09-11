@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace backend.Services
 {
@@ -19,6 +20,8 @@ namespace backend.Services
         Task<string> DeleteAndGenerateRefreshToken(string userId);
         Task<RefreshResponseDto> RefreshAsync(string refreshToken);
         Task<LoginResponse> LoginUser(LoginDto dto);
+        Task UserForgotPassword(string email);
+        Task ResetPassword(ResetPasswordDto dto);
 
     }
     public class AuthService : IAuthService
@@ -27,13 +30,15 @@ namespace backend.Services
         private readonly UserManager<TeamMember> _userManager;
         private readonly TeamDbContext _teamDbContext;
         private readonly ILogger<AuthService> _logger;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
 
-        public AuthService(IConfiguration configuration, ILogger<AuthService> logger, UserManager<TeamMember> userManager, TeamDbContext teamDbContext)
+        public AuthService(IConfiguration configuration, IBackgroundTaskQueue backgroundTaskQueue, ILogger<AuthService> logger, UserManager<TeamMember> userManager, TeamDbContext teamDbContext)
         {
             _configuration = configuration;
             _userManager = userManager;
             _teamDbContext = teamDbContext;
             _logger = logger;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
         public async Task<string> GenerateAccessToken(TeamMember member)
@@ -160,6 +165,33 @@ namespace backend.Services
                 Department = department
             };
             
+        }
+
+        public async Task UserForgotPassword(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new KeyNotFoundException("User with this email does not exist");
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await _backgroundTaskQueue.QueueAsync(async (serviceProvider, ct) =>
+            {
+                var emailService = serviceProvider.GetService<IEmailService>() ?? throw new Exception("EmailService not configured");
+                await emailService.SendForgotPasswordUrl(email, resetToken, user.FirstName, ct);
+            });
+        }
+
+        public async Task ResetPassword(ResetPasswordDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email) ?? throw new KeyNotFoundException("Invalid email");
+            if (string.IsNullOrEmpty(dto.resetToken)) throw new ArgumentException("Invalid/expores token");
+
+            if(dto.NewPassword.Trim() != dto.ConfirmNewPassword.Trim())
+            {
+                throw new ArgumentException("Password inputs must match");
+            }
+            var result = await _userManager.ResetPasswordAsync(user, dto.resetToken, dto.NewPassword);
+            if (!result.Succeeded) {
+                var errors = string.Join(",", result.Errors.Select(e => $"{e.Code}: {e.Description}"));
+                throw new InvalidOperationException(errors);
+            }
         }
     }
 }

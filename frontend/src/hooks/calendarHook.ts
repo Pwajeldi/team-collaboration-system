@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createEvent, deleteEvent, fetchEvents, updateEvent } from "../api/calendarApi";
-import { getUsersToDM } from "../api/memberApi";
+import { createEvent, deleteEvent, fetchEvents, updateEvent, updateEventDuration } from "../api/calendarApi";
+import toast from "react-hot-toast";
 
 
 export const useGetEvents = () => {
@@ -17,6 +17,7 @@ export const useCreateEvent = () => {
         mutationFn: createEvent,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["events"] });
+            toast.success("Event created")
         },
     });
 };
@@ -26,25 +27,33 @@ export const useDeleteEvent = () => {
     return useMutation({
         mutationFn: (id: string) => deleteEvent(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey:["events"]})
-        }
+            queryClient.invalidateQueries({queryKey:["events"]});
+            toast.success(`Event cancelled`)
+        },
+        onError:(error) => toast.error(`${error.message}`)
     })
 }
 
-export const useFetchPotentialAttendees = () => {
-    return useQuery({
-        queryKey:["potential_attendees"],
-        queryFn: getUsersToDM,
-        placeholderData:keepPreviousData,
-    })
-}
 
 export const useUpdateEvent = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: updateEvent,
         onSuccess: () => {
-            queryClient.invalidateQueries({queryKey:["events"]})
-        }
+            queryClient.invalidateQueries({queryKey:["events"]});
+            toast.success("Event has been updated");
+        },
+        onError:(error) => toast.error(`${error.message}`)
+    })
+}
+
+export const useUpdateEventDuration = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: updateEventDuration,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey:["events"]});
+        },
+        onError:(error) => toast.error(`${error.message}`)
     })
 }

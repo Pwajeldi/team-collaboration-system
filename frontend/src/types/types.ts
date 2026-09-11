@@ -191,7 +191,7 @@ export interface EventResponse {
     location?: string;
     start: string;
     end: string;
-    organizer: string;
+    organizerName: string;
     organizerId: string;
     attendees: AttendeeResponse[];
     isMeeting: boolean;
@@ -200,11 +200,20 @@ export interface EventResponse {
 }
 
 export interface UpdateEventDto{
-    eventId?: string;
+    eventId: string;
     eventDescription?: string;
     userIds?: string[];
     start?: string;
     end?: string;
+    location?: string;
+    title?: string;
+    isMeeting: boolean;
+}
+
+export interface UpdateEventTimeDto{
+    eventId: string,
+    newStartTime: string,
+    newEndTime: string,
 }
 
 export interface DepartmentMessageResponse {
@@ -352,4 +361,17 @@ export interface UpdateProfileDto{
     xurl?: string
     facebookUrl?: string;
     profilePictureUrl?: string;
+}
+
+export interface PasswordResetDto{
+    oldPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+}
+
+export interface ChangePasswordDto{
+    email: string;
+    resetToken: string;
+    newPassword: string;
+    confirmNewPassword: string;
 }

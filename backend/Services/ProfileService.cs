@@ -1,6 +1,7 @@
-﻿using Amazon.Runtime.Internal.Util;
-using backend.Data;
+﻿using backend.Data;
 using backend.Dtos;
+using backend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services
@@ -10,14 +11,35 @@ namespace backend.Services
         Task<UserProfileResponse> GetMyProfile(string userId);
         Task DeleteProfile(string userId);
         Task<UserProfileResponse> UpdateMyProfile(string userId, UpdateProfileDto dto);
+        Task ChangePassword(string userId, ChangePasswordDto dto);
     }
     public class ProfileService : IProfileService
     {
         private readonly TeamDbContext _context;
+        private readonly UserManager<TeamMember> _userManager;
+        private readonly ILogger<ProfileService> _logger;
 
-        public ProfileService(TeamDbContext context)
+        public ProfileService(TeamDbContext context, UserManager<TeamMember> userManager, 
+            ILogger<ProfileService> logger)
         {
             _context = context;
+            _userManager = userManager;
+            _logger = logger;
+        }
+
+        public async Task ChangePassword(string userId, ChangePasswordDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new KeyNotFoundException("Invalid userId");
+            if(dto.NewPassword.Trim() != dto.ConfirmNewPassword.Trim())
+            {
+                throw new InvalidOperationException("New password inputs do not match");
+            }
+            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException("Incorrect password");
+            }
+            _logger.LogInformation("Successful password update: {Email}", user.Email);
         }
 
         public async Task DeleteProfile(string userId)
@@ -46,9 +68,31 @@ namespace backend.Services
                     Role = p.Role,
                     Xurl = p.Xurl,
                 })
-                .FirstOrDefaultAsync()
-                ?? throw new KeyNotFoundException("User's profile does not exist");
-            return profile;
+                .FirstOrDefaultAsync();
+                //?? throw new KeyNotFoundException("User's profile does not exist");
+            if(profile is null)
+            {
+                var member = await _userManager.FindByIdAsync(userId);
+                if (member is not null)
+                {
+                    var roles = await _userManager.GetRolesAsync(member);
+                    var newProfile = new UserProfile
+                    {
+                        FirstName = member.FirstName,
+                        LastName = member.LastName,
+                        Email = member.Email!,
+                        DepartmentId = member.DepartmentId,
+                        DateJoined = member.DateJoined,
+                        JobTitle = member.JobTitle!,
+                        UserId = userId,
+                        ProfilePictureUrl = member.ProfilePictureUrl,
+                        Role = roles.FirstOrDefault() ?? ""
+                    };
+                    await _context.UserProfiles.AddAsync(newProfile);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            return profile!;
         }
 
         public async Task<UserProfileResponse> UpdateMyProfile(string userId, UpdateProfileDto dto)

@@ -7,23 +7,26 @@ import type {
     EventClickArg, EventDropArg, EventChangeArg,
     DateSelectArg, EventContentArg,
 } from "@fullcalendar/core";
-import { useGetEvents, useUpdateEvent } from "../hooks/calendarHook";
+import { useGetEvents } from "../hooks/calendarHook";
 import EventFormModal from "../components/eventFormModal";
 import "../styles/calendar.css";
-import type { EventResponse } from "../types/types";
+import type { EventResponse, UpdateEventTimeDto } from "../types/types";
 import EventDetailModal from "../components/eventDetailModal";
 import Loader from "../components/loader";
 import MeetingRoom from "../components/meetingRoom";
+import UpdateEventDurationModal from "../components/eventDurationModal";
+import { getUserId } from "../services/jwtdecode";
 
 const Calendar = () => {
     const calendarRef = useRef<FullCalendar>(null);
+    const currentUserId = getUserId();
     const query = useGetEvents();
-    const update = useUpdateEvent();
-    console.log(query.data?.map(d => d.attendees))
     const [use24HrFormat, setUse24HrFormat] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [showUpdateTimeModal, setShowUpdateTimeMoal] = useState(false);
     const [modalRange, setModalRange] = useState<{ start?: string; end?: string }>({});
     const [selectedEvent, setSelectedEvent] = useState<EventResponse | null>();
+    const [updateEventDuration, setUpdateEventDuration] = useState<UpdateEventTimeDto>();
     const dateOption: Intl.DateTimeFormatOptions = {
         weekday: "long",
         day: "numeric",
@@ -38,7 +41,7 @@ const Calendar = () => {
     const handleJoinMeeting = (event: EventResponse) => {
         const names: Record<string, string> = {};
         event.attendees.forEach(a => { names[a.userId] = a.fullName; });
-        names[event.organizerId] = event.organizer;
+        names[event.organizerId] = event.organizerName;
 
         setActiveMeeting({ meetingId: event.meetingId!, participantNames: names });
         setSelectedEvent(null);
@@ -53,8 +56,12 @@ const Calendar = () => {
             extendedProps: {
                 description: event.description,
                 location: event.location,
-                organizer: event.organizer,
+                organizerName: event.organizerName,
+                organizerId: event.organizerId,
                 attendees: event.attendees,
+                isMeeting: event.isMeeting,
+                meetingId: event.meetingId ?? null,
+                meetingStatus: event.meetingStatus ?? null,
             },
         }));
     }, [query.data]);
@@ -72,16 +79,23 @@ const Calendar = () => {
     };
 
     const handleEventChange = async (changeInfo: EventDropArg | EventChangeArg) => {
-        const newStartStr = changeInfo.event.startStr
-        const newEndStr = changeInfo.event.endStr
+        const organizerId:string = changeInfo.event.extendedProps.organizerId;
+        const isOrganizer = currentUserId === organizerId;
+        if(!isOrganizer){return;}
+        
+        const newStartStr = changeInfo.event.startStr;
+        const newEndStr = changeInfo.event.endStr;
         console.log(newStartStr, newEndStr);
         const eventId = changeInfo.event.id;
         const newStart = new Date(newStartStr).toLocaleDateString("en-US", dateOption);
         const newEnd = new Date(newEndStr).toLocaleDateString("en-US", dateOption);
         console.log(newStart, newEnd);
-        if(window.confirm(`Do you wish to update this event?\n Start-time: ${newStart}\n End: ${newEnd}`)){
-            await update.mutateAsync({eventId:eventId, start:newStartStr, end:newEndStr})
-        }
+        setUpdateEventDuration({
+            eventId: eventId,
+            newStartTime: newStartStr,
+            newEndTime: newEndStr,
+        });
+        setShowUpdateTimeMoal(true);
     };
 
     const handleDateSelect = (selectInfo: DateSelectArg) => {
@@ -152,7 +166,7 @@ const Calendar = () => {
                 slotLabelFormat={timeFormat}
                 select={handleDateSelect}
                 eventClick={handleEventClick}
-                eventDrop={handleEventChange}
+                //eventDrop={handleEventChange}
                 eventResize={handleEventChange}
                 eventContent={renderEventContent}
                 events={calendarEvents}
@@ -181,6 +195,10 @@ const Calendar = () => {
                     participantNames={activeMeeting.participantNames}
                     onLeave={() => setActiveMeeting(null)}
                 />
+            )}
+
+            {showUpdateTimeModal && (
+                <UpdateEventDurationModal onClose={()=>setShowUpdateTimeMoal(false)} eventDto={updateEventDuration}/>
             )}
         </div>
     );

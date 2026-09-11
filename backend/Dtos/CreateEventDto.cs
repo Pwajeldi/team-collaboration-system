@@ -13,19 +13,6 @@ namespace backend.Dtos
         public bool IsMeeting { get; set; } = false;
     }
 
-    public class EventResponse
-    {
-        public Guid Id { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public string? Location { get; set; }
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-        public string OrganizerId { get; set; } = string.Empty;
-        public string OrganizerName { get; set; } = string.Empty;
-        public List<AttendeeResponse> Attendees { get; set; } = new();
-    }
-
     public class AttendeeResponse
     {
         public string UserId { get; set; } = string.Empty;
@@ -34,7 +21,7 @@ namespace backend.Dtos
         public InvitationStatus Status { get; set; }
     }
 
-    public class CalendarEventDto
+    public class EventResponse
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
@@ -42,9 +29,9 @@ namespace backend.Dtos
         public string? Location { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-        public string Organizer { get; set; } = string.Empty;
-        public string organizerId { get; set; } = string.Empty;
-        public List<string> Attendees { get; set; } = new();
+        public string OrganizerName { get; set; } = string.Empty;
+        public string OrganizerId { get; set; } = string.Empty;
+        public List<AttendeeResponse> Attendees { get; set; } = new();
         public bool IsMeeting { get; set; }
         public Guid? MeetingId { get; set; }
         public string? MeetingStatus { get; set; }

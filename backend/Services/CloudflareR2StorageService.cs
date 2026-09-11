@@ -31,7 +31,7 @@ namespace backend.Services
                 Key = key,
                 InputStream = fileStream,
                 ContentType = contentType,
-                DisablePayloadSigning = true
+                DisablePayloadSigning = true,       
             };
 
             await _s3Client.PutObjectAsync(request);

@@ -11,17 +11,18 @@ namespace backend.Services
         Task SendEmailToNewUser(string recipientEmail, string recipientName, CancellationToken ct = default);
         Task SendEventInvite(TeamMember recipient, Event calendarEvent, bool hadOverlapAtCreation, CancellationToken ct = default);
         Task SendEventCancelledEmail(TeamMember recipient, string eventTitle, DateTime eventStart, CancellationToken ct = default);
+        Task SendForgotPasswordUrl(string userEmail, string resetToken, string userName, CancellationToken ct = default);
     }
     public class EmailService : IEmailService
     {
         private readonly MailCreds _mailCreds;
         private readonly FrontendOptions _frontend;
-        private readonly ILogger<EmailService> _logger;
+        private readonly ILogger<IEmailService> _logger;
 
         public EmailService(
             IOptions<MailCreds> mailOptions,
             IOptions<FrontendOptions> frontendOptions,
-            ILogger<EmailService> logger)
+            ILogger<IEmailService> logger)
         {
             _mailCreds = mailOptions.Value;
             _frontend = frontendOptions.Value;
@@ -45,6 +46,8 @@ namespace backend.Services
 
             await SendAsync(mail, ct);
         }
+
+
 
         public async Task SendEventInvite(TeamMember recipient, Event calendarEvent, bool hadOverlapAtCreation, CancellationToken ct = default)
         {
@@ -140,6 +143,21 @@ namespace backend.Services
                     $"It's been removed from your calendar.\n\n" +
                     $"View your calendar:\n{calendarUrl}"
             );
+
+            await SendAsync(mail, ct);
+        }
+
+        public async Task SendForgotPasswordUrl(string userEmail, string resetToken, string userName, CancellationToken ct = default)
+        {
+            var resetUrl = $"{_frontend.BaseUrl.TrimEnd("/")}/reset-password" +
+                           $"?email={Uri.EscapeDataString(userEmail!)}" +
+                           $"&token={Uri.EscapeDataString(resetToken)}"
+            ;
+            var subject = "Reset Password";
+            var body = $"Hello {userName}, \n\n" + 
+                "Go to the url below to change your password \n" +
+                $"{resetUrl}";
+            var mail = BuildMessage(userEmail, userName, subject, body);
 
             await SendAsync(mail, ct);
         }

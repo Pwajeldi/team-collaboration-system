@@ -1,0 +1,162 @@
+/* calendar.css */
+
+.calendar-container {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+}
+
+.calendar-toolbar-extra {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.time-format-btn {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.time-format-btn:hover {
+  background: var(--color-background);
+  border-color: var(--color-primary);
+}
+
+.calendar-create-btn {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.calendar-create-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.calendar-error {
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-severe);
+}
+
+/* ---- FullCalendar theme overrides ---- */
+
+.fc .fc-toolbar-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-header);
+}
+
+.fc .fc-button-primary {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    box-shadow: none;
+    text-transform: capitalize;
+    font-weight: 500;
+}
+
+.fc .fc-button-primary:hover {
+    background: var(--color-background);
+    border-color: var(--color-primary);
+    color: var(--color-header);
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+}
+
+.fc .fc-today-button {
+    text-transform: capitalize;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border-color: #eef0f3;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.6rem 0;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #374151;
+    font-size: 0.85rem;
+    padding: 0.4rem;
+}
+
+.fc .fc-day-today {
+    background: #f5f4fb !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.fc-daygrid-day-frame {
+    padding: 2px;
+}
+
+/* ---- event pills ---- */
+
+.fc-daygrid-event {
+    border: none !important;
+    background: transparent !important;
+    margin-bottom: 2px !important;
+}
+
+.event-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #eeeef8;
+  font-size: 0.74rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.event-time {
+  color: var(--color-primary);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.event-title {
+  color: var(--color-header);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc .fc-daygrid-more-link {
+  font-size: 0.74rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}

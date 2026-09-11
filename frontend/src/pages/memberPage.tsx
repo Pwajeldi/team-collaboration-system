@@ -38,7 +38,6 @@ const MembersPage = () => {
         }
     ));};
 
-    console.log(query.data?.items)
     const columns = columnHelper.columns([
         columnHelper.accessor("firstName", {header:"FirstName", cell:(info)=>info.getValue()}),
         columnHelper.accessor("lastName", {header:"LastName", cell:(info)=>info.getValue()}),

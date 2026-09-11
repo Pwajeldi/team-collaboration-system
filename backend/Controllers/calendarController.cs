@@ -4,6 +4,8 @@ using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 
 namespace backend.Controllers
@@ -94,6 +96,42 @@ namespace backend.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("update-duration")]
+        public async Task<IActionResult> UpdateEventTime(UpdateEventDurationDto dto)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if(userId is null) return Unauthorized();
+                await _calendar.UpdateEventDuration(dto, userId);
+                return Ok("Event schedule updated successfully");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -101,7 +139,7 @@ namespace backend.Controllers
         }
 
         [HttpDelete("events/delete/{eventId}")]
-        public async Task<IActionResult> DeleteEvent(Guid eventId)
+        public async Task<IActionResult> CancelEvent(Guid eventId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId is null) return Unauthorized();
@@ -136,8 +174,8 @@ namespace backend.Controllers
                 Location = eventEntity.Location,
                 Start = eventEntity.Start,
                 End = eventEntity.End,
-                OrganizerId = eventEntity.OrganizerId,
                 OrganizerName = $"{firstName} {lastName}" ?? string.Empty,
+                OrganizerId = eventEntity.OrganizerId,
                 Attendees = [.. eventEntity.Attendees.Select(a => new AttendeeResponse
                 {
                     UserId = a.UserId,
@@ -145,6 +183,9 @@ namespace backend.Controllers
                     HadOverlapAtCreation = a.HadOverlapAtCreation,
                     Status = a.Status,
                 })],
+                IsMeeting = eventEntity.IsMeeting,
+                MeetingId = eventEntity.EventMeetingId,
+                MeetingStatus = eventEntity.Meeting != null ? eventEntity.Meeting.Status : null,
             };
         }
     }

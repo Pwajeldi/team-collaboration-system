@@ -44,9 +44,14 @@ export const updateMember = async(id: string, payload: UpdateMemberDto) => {
     return data;
 }
 
-export const getUsersToDM = async(filters: MemberQueryParams) => {
+export const getUsersToDM = async(filters?: MemberQueryParams) => {
     const {data} = await api.get<UserList[]>(`/team/listusers`, {
         params: {...filters}
     });
     return data;
 }
+
+export const fetchOnlineUsers = async () => {
+    const { data } = await api.get<string[]>("/team/online");
+    return data;
+};

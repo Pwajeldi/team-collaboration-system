@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace backend.Controllers
 {
@@ -66,6 +67,51 @@ namespace backend.Controllers
             catch (Exception ex)
             {
                 return Unauthorized(ex.Message);
+            }
+        }
+
+        [HttpPost("forgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromQuery] string email)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrWhiteSpace(email)) return BadRequest("Email not provided");
+            try
+            {
+                await _authService.UserForgotPassword(email);
+                return Ok("Check your inbox for the password reset link");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(ex.Message);
+            }    
+        }
+
+        [HttpPost("resetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody]ResetPasswordDto dto)
+        {
+            try
+            {
+                await _authService.ResetPassword(dto);
+                return Ok("Your password has been saved");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 

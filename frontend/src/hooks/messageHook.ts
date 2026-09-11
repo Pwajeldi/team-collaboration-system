@@ -10,6 +10,7 @@ export const useMessageQuery = (otherUserId:string) => {
         queryFn: ({pageParam}) => loadMessages({otherUserId:otherUserId, encodedCursor:pageParam}),
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage:PaginatedMessageResponse) => lastPage.nextCursor ?? undefined,
+        staleTime: Infinity,
         placeholderData: keepPreviousData,
     })
 }

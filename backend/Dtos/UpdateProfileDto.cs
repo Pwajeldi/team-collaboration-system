@@ -1,4 +1,5 @@
 ﻿using backend.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace backend.Dtos
 {
@@ -31,5 +32,20 @@ namespace backend.Dtos
         public string? Xurl { get; set; }
         public string? FacebookUrl { get; set; }
         public string? ProfilePictureUrl { get; set; }
+    }
+
+    public class ChangePasswordDto
+    {
+        [Required] public required string OldPassword { get; set; }
+        [Required] public required string NewPassword { get; set; }
+        [Required] public required string ConfirmNewPassword { get; set; }
+    }
+
+    public class ResetPasswordDto
+    {
+        [Required] public string Email { get; set; } = string.Empty;
+        [Required] public string resetToken { get; set; } = string.Empty;
+        [Required] public string NewPassword { get; set; } = string.Empty;
+        [Required] public string ConfirmNewPassword { get; set; } = string.Empty;
     }
 }

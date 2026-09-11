@@ -27,6 +27,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<TeamDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromMinutes(20);
+});
+
 builder.Services.AddIdentity<TeamMember, IdentityRole>(options =>
 {
     options.Lockout.MaxFailedAccessAttempts = 7;

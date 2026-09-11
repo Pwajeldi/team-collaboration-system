@@ -118,6 +118,18 @@ export const useChatSocket = () => {
         
     };
 
+    const handleUserOnline = (userId: string) => {
+        queryClient.setQueryData<string[]>(["online-users"], (old = []) => {
+            return old?.includes(userId) ? old : [...old, userId];
+        })
+    }
+
+    const handleUserOffline = (userId: string) => {
+        queryClient.setQueryData<string[]>(["online-users"], (old = []) => {
+            return old.includes(userId) ? old.filter(id => id !== userId) : old;
+        });
+    }
+
     const clearUnreadBadge = () => {
         queryClient.invalidateQueries({queryKey:["userList"]});
     }
@@ -129,7 +141,9 @@ export const useChatSocket = () => {
         connection.on("ReceiveMessage", handleReceive);
         connection.on("InvitedToEvent", handleNewEvent);
         connection.on("MessagesRead", handleMessagesRead);
-        connection.on("ClearUnreadBadge", clearUnreadBadge)
+        connection.on("ClearUnreadBadge", clearUnreadBadge);
+        connection.on("UserOnline", handleUserOnline);
+        connection.on("UserOffline", handleUserOffline);
 
         if (connection.state === signalR.HubConnectionState.Disconnected && !started.current) {
             started.current = true;
@@ -142,6 +156,8 @@ export const useChatSocket = () => {
             connection.off("InvitedToEvent", handleNewEvent);
             connection.off("MessagesRead", handleMessagesRead);
             connection.off("ClearUnreadBadge", clearUnreadBadge);
+            connection.off("UserOnline", handleUserOnline);
+            connection.off("UserOffline", handleUserOffline);
         };
     }, [selectedUser?.userId]);
 };

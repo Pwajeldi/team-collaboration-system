@@ -16,20 +16,23 @@ namespace backend.Hubs
         private readonly IConnectionManager _connectionManager;
         private readonly TeamDbContext _teamDbContext;
         private readonly UserManager<TeamMember> _userManager;
+        private readonly ILogger<ChatHub> _logger;
 
-        public ChatHub(IConnectionManager connectionManager, TeamDbContext teamDbContext, UserManager<TeamMember> userManager)
+        public ChatHub(IConnectionManager connectionManager, ILogger<ChatHub> logger, TeamDbContext teamDbContext, UserManager<TeamMember> userManager)
         {
             _connectionManager = connectionManager;
             _teamDbContext = teamDbContext;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public override async Task OnConnectedAsync()
         {
+            var memberId = Context.UserIdentifier ?? throw new Exception("Unable to connect user");
             try
             {
                 var connectionId = Context.ConnectionId.ToString();
-                var memberId = Context.UserIdentifier;
+                
                 if (string.IsNullOrWhiteSpace(memberId))
                 {
                     Context.Abort();
@@ -43,10 +46,8 @@ namespace backend.Hubs
                 }
                 var deptId = member!.DepartmentId;
                 await Groups.AddToGroupAsync(connectionId, $"dept-{deptId}");
-                if (!string.IsNullOrWhiteSpace(memberId))
-                {
-                    _connectionManager.AddConnection(memberId!, connectionId);
-                }
+                var wasAlreadyOnline = _connectionManager.GetConnections(memberId).Any();
+                _connectionManager.AddConnection(memberId!, connectionId);
 
                 var undeliveredMessages = await _teamDbContext.Messages.Where(m => m.RecipientId == memberId && !m.isDelivered).ToListAsync();
                 foreach(var message in undeliveredMessages)
@@ -56,20 +57,25 @@ namespace backend.Hubs
                 await _teamDbContext.SaveChangesAsync();
 
                 await base.OnConnectedAsync();
+
+                if (!wasAlreadyOnline)
+                {
+                    await Clients.Others.SendAsync("UserOnline", memberId);
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(ex, "Error occured while disconnecting from the hub: User-{UserId}", memberId);
                 return;
             }
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            var memberId = Context.UserIdentifier;
             try
             {
-                var connectionId = Context.ConnectionId.ToString();
-                var memberId = Context.UserIdentifier;
+                var connectionId = Context.ConnectionId.ToString();           
                 if (!string.IsNullOrWhiteSpace(memberId))
                 {
                     var member = await _userManager.FindByIdAsync(memberId);
@@ -78,12 +84,16 @@ namespace backend.Hubs
                         var deptId = member!.DepartmentId;
                         await Groups.RemoveFromGroupAsync(connectionId, $"dept-{deptId}");
                     }
-                    _connectionManager.RemoveConnection(memberId!, connectionId);
+                    var isLastConnection = _connectionManager.RemoveConnection(memberId!, connectionId);
+                    if (isLastConnection)
+                    {
+                        await Clients.Others.SendAsync("UserOffline", memberId);
+                    }
                 }
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(ex,"Error occured while disconnecting from the hub: User-{UserId}", memberId);
             }
             
             await base.OnDisconnectedAsync(exception);

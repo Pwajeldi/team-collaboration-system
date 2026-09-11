@@ -1,4 +1,5 @@
-import type { UpdateProfileDto, UserProfileResponse } from "../types/types";
+import axios, { AxiosError } from "axios";
+import type { PasswordResetDto, UpdateProfileDto, UserProfileResponse } from "../types/types";
 import api from "./axios";
 
 export const getMyProfile = async () => {
@@ -12,6 +13,29 @@ export const deleteProfile = async () => {
 }
 
 export const updateMyProfile = async(payload: UpdateProfileDto) => {
-    const response = await api.put(`/profile/update/`, payload);
+    try{
+        const response = await api.put(`/profile/update/`, payload);
     return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data)
+        }else{
+            throw new Error(error as string)
+        }
+    }   
+}
+
+export const resetPassword = async(payload: PasswordResetDto) => {
+    try{
+        const response = await api.put(`/profile/password/update`, payload);
+        return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data)
+        }else{
+            throw new Error(error as string)
+        }
+    }
 }

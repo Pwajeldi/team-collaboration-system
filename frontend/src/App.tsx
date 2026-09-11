@@ -14,6 +14,8 @@ import ManagerTaskPage from './pages/managerTaskPage'
 import ManagerDashboardPage from './pages/managerDashboardPage'
 import RegularDashboardPage from './pages/regularDashboardPAge'
 import MyProfile from './pages/profilePage'
+import ForgotPasswordPage from './pages/forgotPAsswordPage'
+import ResetPassworPage from './pages/resetPasswordPage'
 
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -23,6 +25,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage/>, handle: { title: "Login" } },
+  { path: "/forgotPassword", element: <ForgotPasswordPage/>},
+  { path: "/reset-password", element: <ResetPassworPage/>},
   { path: "/", element: <Navigate to="/login"/> },
   {
     element: <ProtectedRoute><AppLayout/></ProtectedRoute>,

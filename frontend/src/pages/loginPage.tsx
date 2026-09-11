@@ -1,5 +1,5 @@
 import { useLogin } from "../hooks/loginHook"
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 import "../styles/loginPage.css"
 import z from "zod"
 import {useForm} from "@tanstack/react-form"
@@ -89,6 +89,10 @@ const LoginPage = () => {
                                 placeholder="Password"
                             />} 
                         </form.Field>
+                    </div>
+
+                    <div className="forgot-password-container">
+                        <Link className="forgot-password" to={`/forgotPassword`}>Forgot Password</Link>
                     </div>
 
                     <button className="login-btn" type="submit">

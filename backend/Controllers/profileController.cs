@@ -11,9 +11,9 @@ namespace backend.Controllers
     [ApiController]
     public class profileController : ControllerBase
     {
-        private readonly ProfileService _profileService;
+        private readonly IProfileService _profileService;
 
-        public profileController(ProfileService profileService)
+        public profileController(IProfileService profileService)
         {
             _profileService = profileService;
         }
@@ -75,6 +75,29 @@ namespace backend.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("password/update")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); if (userId is null) return Unauthorized();
+            try
+            {
+                await _profileService.ChangePassword(userId, dto);
+                return Ok("Check your email to verify request");
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

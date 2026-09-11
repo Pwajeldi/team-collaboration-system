@@ -5,22 +5,23 @@ namespace backend.Services
     public interface IConnectionManager
     {
         void AddConnection(string userId, string connectionId);
-        void RemoveConnection(string userId, string connectionId);
+        bool RemoveConnection(string userId, string connectionId);
         IEnumerable<string> GetConnections(string userId);
+        IEnumerable<string> GetOnlineUserIds();
     }
     public class ConnectionManager : IConnectionManager
     {
         private readonly ConcurrentDictionary<string, HashSet<string>> _userConnections = new();
         public void AddConnection(string userId, string connectionId)
         {
-            var connections = _userConnections.GetOrAdd(userId, _ => new HashSet<string>());
+            var connections = _userConnections.GetOrAdd(userId, _ => []);
             lock (connections)
             {
                 connections.Add(connectionId);
             }
         }
 
-        public void RemoveConnection(string userId, string connectionId)
+        public bool RemoveConnection(string userId, string connectionId)
         {
             if(_userConnections.TryGetValue(userId, out var connections))
             {
@@ -30,9 +31,11 @@ namespace backend.Services
                     if (connections.Count == 0)
                     {
                         _userConnections.TryRemove(userId, out _);
+                        return true; // meaning no more connections, the user is now offline
                     }
                 }
             }
+            return false; //user still has some connections
         }
 
         public IEnumerable<string> GetConnections(string userId)
@@ -45,6 +48,11 @@ namespace backend.Services
                 }
             }
             return Enumerable.Empty<string>();
+        }
+
+        public IEnumerable<string> GetOnlineUserIds()
+        {
+            return _userConnections.Keys.ToList();
         }
     }
 }

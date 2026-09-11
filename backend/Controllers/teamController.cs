@@ -21,14 +21,17 @@ namespace backend.Controllers
         private readonly TeamDbContext _context;
         private readonly ITeamMemberService _service;
         private readonly UserManager<TeamMember> _userManager;
+        private readonly IConnectionManager _connectionManager;
 
         public teamController(TeamDbContext context, 
-            ITeamMemberService service, UserManager<TeamMember> userManager
+            ITeamMemberService service, UserManager<TeamMember> userManager,
+            IConnectionManager connectionManager
             )
         {
             _context = context;
             _service = service;
             _userManager = userManager;
+            _connectionManager = connectionManager;
         }
 
         [HttpGet("members")]
@@ -211,6 +214,12 @@ namespace backend.Controllers
                 });
             var users = await query.ToListAsync();
             return Ok(users);
+        }
+
+        [HttpGet("online")]
+        public async Task<IActionResult> GetOnlineUsers()
+        {
+            return Ok(_connectionManager.GetOnlineUserIds());
         }
 
         public static string EncodeCursor(MessageCursor cursor)

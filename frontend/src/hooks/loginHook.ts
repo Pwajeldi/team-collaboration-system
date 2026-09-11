@@ -1,5 +1,6 @@
 import {keepPreviousData, useMutation, useQuery} from "@tanstack/react-query"
-import { fetchRoles, login } from "../api/authApi"
+import { changePassword, fetchRoles, forgotPassword, login } from "../api/authApi"
+import toast from "react-hot-toast";
 
 
 export const useLogin = () => {
@@ -14,5 +15,17 @@ export const useFetchRoles = () => {
         queryFn: fetchRoles,
         staleTime: Infinity,
         placeholderData: keepPreviousData
+    })
+}
+
+export const useForgotPassword = () => {
+    return useMutation({
+        mutationFn: forgotPassword,
+    })
+}
+
+export const useChangePassword = () => {
+    return useMutation({
+        mutationFn: changePassword,
     })
 }

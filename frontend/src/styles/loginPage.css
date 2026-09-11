@@ -114,3 +114,11 @@
     color: #9ca3af;
     font-size: 0.78rem;
 }
+
+.forgot-password-container{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 0.7rem;
+    color: #6b7280;
+}

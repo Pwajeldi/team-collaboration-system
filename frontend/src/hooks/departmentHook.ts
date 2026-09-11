@@ -13,7 +13,8 @@ export const useDeleteDepartment = () => {
 export const useFetchDepartments = () => {
     return useQuery({
         queryKey: ["departments"],
-        queryFn: fetchDepartments, 
+        queryFn: fetchDepartments,
+        staleTime: 10*60_000, 
     });
 };
 
