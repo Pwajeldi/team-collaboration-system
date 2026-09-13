@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { /*useEffect*/ useState } from "react";
 import Loader from "../components/loader";
 import { useGetMyProfile, useResetPassword, useUpdateMyProfile } from "../hooks/profileHook"
 import "../styles/profilePage.css"
@@ -25,12 +25,12 @@ const MyProfile = () => {
     const jobTitle = data?.jobTitle;
     const [bio, setBio] = useState(data?.bio);
     const [dob, setDob] = useState(data?.dateOfBirth);
-    const [linkedinUrl, setLinkedinUrl] = useState(data?.linkedInUrl);
-    const [githubUrl, setGithubUrl] = useState(data?.githubUrl);
-    const [xUrl, setXUrl] = useState(data?.xurl);
-    const [facebookUrl, setFacebookUrl] = useState(data?.facebookUrl);
+    const [linkedinUrl, /*setLinkedinUrl*/] = useState(data?.linkedInUrl);
+    const [githubUrl, /*setGithubUrl*/] = useState(data?.githubUrl);
+    const [xUrl, /*setXUrl*/] = useState(data?.xurl);
+    const [facebookUrl, /*setFacebookUrl*/] = useState(data?.facebookUrl);
     const [phoneNumber, setPhoneNumber] = useState(data?.phoneNumber);
-    const [profilePicture, setProfilePicture] = useState(data?.profilePictureUrl);
+    const [profilePicture, /*setProfilePicture*/] = useState(data?.profilePictureUrl);
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmNewPassword, setConfirmNewPassword] = useState("");

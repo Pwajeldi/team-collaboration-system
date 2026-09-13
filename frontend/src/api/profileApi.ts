@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import type { PasswordResetDto, UpdateProfileDto, UserProfileResponse } from "../types/types";
 import api from "./axios";
 

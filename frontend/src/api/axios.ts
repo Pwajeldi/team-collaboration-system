@@ -11,7 +11,7 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 // Main API instance — used for all normal app requests.
 // This is the one with the 401-handling interceptor attached.
 export const api = axios.create({
-    baseURL: "https://localhost:4000/api",
+    baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true, // sends the httpOnly refreshToken cookie automatically on every request
 });
 

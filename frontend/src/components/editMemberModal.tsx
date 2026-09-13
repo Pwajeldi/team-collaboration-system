@@ -109,7 +109,7 @@ const EditMemberModal = ({ member, onClose, onSuccess }: EditMemberModalProps) =
                                     disabled={departmentsQuery.isLoading}
                                 >
                                     {departmentsQuery.data?.map((d) => (
-                                        <option key={d.id} value={d.id}>{d.departmentName}</option>
+                                        <option key={d.departmentId} value={d.departmentName}>{d.departmentName}</option>
                                     ))}
                                 </select>
                             )}
