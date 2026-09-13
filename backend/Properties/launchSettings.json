@@ -18,13 +18,13 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "scalar/v1",
-      "applicationUrl": "https://localhost:4000;http://localhost:4001"
+      "applicationUrl": "https://localhost:4001;http://localhost:4000"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
-        "ASPNETCORE_HTTPS_PORTS": "4000",
+        "ASPNETCORE_HTTPS_PORTS": "4001",
         "ASPNETCORE_HTTP_PORTS": "4000"
       },
       "publishAllPorts": true,

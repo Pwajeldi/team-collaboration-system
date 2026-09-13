@@ -1,4 +1,5 @@
 import * as signalR from "@microsoft/signalr";
+import { API_URL } from "../api/axios";
 
 let connection: signalR.HubConnection | null = null;
 
@@ -6,12 +7,11 @@ export const getConnection = () => {
     if (connection) return connection;
 
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:4000/hubs/chathub", {
+        .withUrl(`${API_URL}/hubs/chathub`, {
             accessTokenFactory: () => sessionStorage.getItem("accessToken") ?? "",
         })
         .withAutomaticReconnect()
         .build();
-
     return connection;
 };
 

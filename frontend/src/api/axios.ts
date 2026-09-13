@@ -10,8 +10,9 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 
 // Main API instance — used for all normal app requests.
 // This is the one with the 401-handling interceptor attached.
+export const API_URL:string = import.meta.env.VITE_API_URL;
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: `${API_URL}/api`,
     withCredentials: true, // sends the httpOnly refreshToken cookie automatically on every request
 });
 
@@ -22,7 +23,7 @@ export const api = axios.create({
 // attempt to refresh again — recursively. A bare instance sidesteps that
 // entirely: a 401 from this instance just fails normally, no retry logic attached.
 const refreshApi = axios.create({
-    baseURL: "https://localhost:4000/api",
+    baseURL: `${API_URL}/api`,
     withCredentials: true, // still needs to send the refreshToken cookie
 });
 

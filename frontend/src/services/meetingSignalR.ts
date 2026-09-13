@@ -1,4 +1,5 @@
 import * as signalR from "@microsoft/signalr";
+import { API_URL } from "../api/axios";
 
 let connection: signalR.HubConnection | null = null;
 
@@ -6,7 +7,7 @@ export const getMeetingConnection = () => {
     if (connection) return connection;
 
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:4000/hubs/meetinghub", {
+        .withUrl(`${API_URL}/hubs/meetinghub`, {
             accessTokenFactory: () => sessionStorage.getItem("accessToken") ?? "",
         })
         .withAutomaticReconnect()
