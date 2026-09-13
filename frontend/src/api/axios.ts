@@ -1,27 +1,16 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 
-// Extend axios's config type so TypeScript knows about our custom `_retry` flag.
-// Axios doesn't ship this property — we're using it ourselves to mark
-// "this request has already attempted one refresh-and-retry cycle",
-// so we need TS to accept it without complaining.
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
     _retry?: boolean;
 }
 
-// Main API instance — used for all normal app requests.
-// This is the one with the 401-handling interceptor attached.
-export const API_URL:string = import.meta.env.VITE_API_URL;
+
+export const API_URL:string = "https://bride-webshots-exotic-theatre.trycloudflare.com" //import.meta.env.VITE_API_URL;
 export const api = axios.create({
     baseURL: `${API_URL}/api`,
     withCredentials: true, // sends the httpOnly refreshToken cookie automatically on every request
 });
 
-// Separate, interceptor-free instance used ONLY for the refresh call itself.
-// Why a second instance: if `api` had this same interceptor attached,
-// and the refresh call ever came back 401 (refresh token itself expired/invalid),
-// the interceptor would try to intercept its OWN failed refresh call and
-// attempt to refresh again — recursively. A bare instance sidesteps that
-// entirely: a 401 from this instance just fails normally, no retry logic attached.
 const refreshApi = axios.create({
     baseURL: `${API_URL}/api`,
     withCredentials: true, // still needs to send the refreshToken cookie

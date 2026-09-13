@@ -33,11 +33,11 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        VITE_API_URL: https://localhost:4001
+      #args:
+      #  VITE_API_URL: https://localhost:4001
     container_name: teamsync-frontend
-    env_file:
-      - ./frontend/.env
+    #env_file:
+    #  - ./frontend/.env
     ports:
       - "4173:4173"
     depends_on:
@@ -48,7 +48,7 @@ services:
     container_name: teamsync-cloudflared
     env_file:
       - backend/.env
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    command: tunnel --no-autoupdate --url http://backend:4000
     depends_on:
       - backend
     restart: unless-stopped
