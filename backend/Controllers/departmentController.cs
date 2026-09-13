@@ -45,7 +45,7 @@ namespace backend.Controllers
         [HttpGet("get")]
         public async Task<IActionResult> GetDepartments()
         {
-            var departments = await _context.Departments.Select(d => new getDepartmentResponse
+            var departments = await _context.Departments.Select(d => new GetDepartmentResponse
             {
                 DepartmentId = d.Id,
                 DepartmentName = d.DepartmentName
@@ -92,7 +92,17 @@ namespace backend.Controllers
                                     SenderId = dm.SenderId,
                                     SenderName = dm.Sender.FirstName,
                                     Content = dm.Message,
-                                    SentDate = dm.SentAt
+                                    SentDate = dm.SentAt,
+                                    IsRead = dm.IsRead,
+                                    IsDelivered = dm.IsDelivered,
+                                    Attachments = dm.DepartmentAttachments.Select(dm => new AttachmentResponse
+                                    {
+                                        Id = dm.Id,
+                                        BlobName = dm.BlobName,
+                                        ContentType = dm.ContentType,
+                                        FileName = dm.FileName,
+                                        FileSizeBytes = dm.FileSizeBytes,
+                                    }).ToList(),
                                 })
                                 .Take(pageSize + 1)
                                 .ToListAsync();

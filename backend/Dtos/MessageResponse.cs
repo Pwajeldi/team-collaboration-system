@@ -8,10 +8,10 @@
         public string SenderId { get; set; } = string.Empty;
         public string RecipientId { get; set; } = string.Empty;
         public string SenderName {  get; set; } = string.Empty;
-        public bool isRead { get; set; }
-        public bool isDelivered { get; set; }
+        public bool IsRead { get; set; }
+        public bool IsDelivered { get; set; }
         public List<AttachmentResponse> Attachments { get; set; } = [];
-        public bool isDeleted { get; set; }
+        public bool IsDeleted { get; set; }
     }
 
     public class DepartmentMessageResponse
@@ -21,9 +21,13 @@
         public DateTime SentDate { get; set; }
         public required string SenderId { get; set; }
         public required string SenderName { get; set; }
+        public List<AttachmentResponse> Attachments { get; set; } = [];
+        public bool IsRead { get; set; }
+        public bool IsDelivered { get; set; }
+        public bool IsDeleted { get; set; }
     }
 
-    public class getDepartmentResponse
+    public class GetDepartmentResponse
     {
         public int DepartmentId { get; set; }
         public required string DepartmentName { get; set; }

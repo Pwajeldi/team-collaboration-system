@@ -307,7 +307,7 @@ namespace backend.Services
 
         private async Task<int> GetUnreadMessages(string userId)
         {
-            var unreadMessageCount = await _context.Messages.Where(m => m.RecipientId == userId && !m.isRead).CountAsync();
+            var unreadMessageCount = await _context.Messages.Where(m => m.RecipientId == userId && !m.IsRead).CountAsync();
             return unreadMessageCount;
         }
     }

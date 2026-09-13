@@ -13,7 +13,7 @@
         public DateTime ReadAt { get; set; }
         public bool IsDeletedBySender { get; set; }
         public bool IsDeletedByRecipient { get; set; }
-        public bool isDelivered { get; set; } = false;
-        public bool isRead { get; set; } = false;
+        public bool IsDelivered { get; set; } = false;
+        public bool IsRead { get; set; } = false;
     }
 }

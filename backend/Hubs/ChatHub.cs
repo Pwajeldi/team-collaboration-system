@@ -49,10 +49,10 @@ namespace backend.Hubs
                 var wasAlreadyOnline = _connectionManager.GetConnections(memberId).Any();
                 _connectionManager.AddConnection(memberId!, connectionId);
 
-                var undeliveredMessages = await _teamDbContext.Messages.Where(m => m.RecipientId == memberId && !m.isDelivered).ToListAsync();
+                var undeliveredMessages = await _teamDbContext.Messages.Where(m => m.RecipientId == memberId && !m.IsDelivered).ToListAsync();
                 foreach(var message in undeliveredMessages)
                 {
-                    message.isDelivered = true;
+                    message.IsDelivered = true;
                 }
                 await _teamDbContext.SaveChangesAsync();
 
@@ -103,12 +103,11 @@ namespace backend.Hubs
         {
             if (string.IsNullOrWhiteSpace(message) && !attachmentId.HasValue) return;
             var callerId = Context.UserIdentifier;
-            var recipient = await _userManager.FindByIdAsync(recipientId);
-     
-            if (!string.IsNullOrWhiteSpace(callerId) && recipient != null)
-            {
-                var isRecepientOnline = _connectionManager.GetConnections(recipientId).Any();
+            if (callerId is null) return;
+            var messageMyself = callerId == recipientId;
 
+            if (messageMyself)
+            {
                 MessageAttachment? attachment = null;
                 if (attachmentId.HasValue)
                 {
@@ -120,12 +119,13 @@ namespace backend.Hubs
                 }
 
                 var newMessage = new Messages
-                {   
+                {
                     SenderId = callerId,
                     RecipientId = recipientId,
                     Content = message,
                     SentAt = DateTime.UtcNow,
-                    isDelivered = isRecepientOnline,
+                    IsDelivered = true,
+                    IsRead = true,
                 };
 
                 await _teamDbContext.Messages.AddAsync(newMessage);
@@ -138,16 +138,16 @@ namespace backend.Hubs
                 }
                 var caller = await _teamDbContext.Users.FirstOrDefaultAsync(u => u.Id == callerId);
                 var callerName = $"{caller!.FirstName} {caller.LastName}";
-               
+
                 var messageResponse = new MessageResponse
                 {
                     MessageId = newMessage.Id,
-                    SenderId = newMessage.SenderId,
-                    SenderName = callerName,
                     RecipientId = newMessage.RecipientId,
+                    SenderId = newMessage.SenderId,
                     Content = newMessage.Content,
                     SentDate = newMessage.SentAt,
-                    isDelivered = newMessage.isDelivered,
+                    IsDelivered = true,
+                    IsRead = true,
                     Attachments = attachment is not null ? new List<AttachmentResponse>
                         {
                             new AttachmentResponse
@@ -159,37 +159,130 @@ namespace backend.Hubs
                                 FileSizeBytes = attachment.FileSizeBytes,
                             }
                         }
-                        : new List<AttachmentResponse>(),
+                        : [],
                 };
+                await Clients.Caller.SendAsync("ReceiveMyMessage", messageResponse);
+            }
+            else
+            {
+                var recipient = await _userManager.FindByIdAsync(recipientId);
 
-                await Clients.Caller.SendAsync("ReceiveMessage", messageResponse);
-                await Clients.User(recipientId).SendAsync("ReceiveMessage", messageResponse);
+                if (!string.IsNullOrWhiteSpace(callerId) && recipient != null)
+                {
+                    var isRecepientOnline = _connectionManager.GetConnections(recipientId).Any();
+
+                    MessageAttachment? attachment = null;
+                    if (attachmentId.HasValue)
+                    {
+                        attachment = await _teamDbContext.MessageAttachments.FindAsync(attachmentId.Value);
+                        if (attachment is null || attachment.MessageId is not null)
+                        {
+                            attachment = null;
+                        }
+                    }
+
+                    var newMessage = new Messages
+                    {
+                        SenderId = callerId,
+                        RecipientId = recipientId,
+                        Content = message,
+                        SentAt = DateTime.UtcNow,
+                        IsDelivered = isRecepientOnline,
+                    };
+
+                    await _teamDbContext.Messages.AddAsync(newMessage);
+                    await _teamDbContext.SaveChangesAsync();
+
+                    if (attachment is not null)
+                    {
+                        attachment.MessageId = newMessage.Id;
+                        await _teamDbContext.SaveChangesAsync();
+                    }
+                    var caller = await _teamDbContext.Users.FirstOrDefaultAsync(u => u.Id == callerId);
+                    var callerName = $"{caller!.FirstName} {caller.LastName}";
+
+                    var messageResponse = new MessageResponse
+                    {
+                        MessageId = newMessage.Id,
+                        SenderId = newMessage.SenderId,
+                        SenderName = callerName,
+                        RecipientId = newMessage.RecipientId,
+                        Content = newMessage.Content,
+                        SentDate = newMessage.SentAt,
+                        IsDelivered = newMessage.IsDelivered,
+                        Attachments = attachment is not null ? new List<AttachmentResponse>
+                        {
+                            new AttachmentResponse
+                            {
+                                Id = attachment.Id,
+                                BlobName = attachment.BlobName,
+                                FileName = attachment.FileName,
+                                ContentType = attachment.ContentType,
+                                FileSizeBytes = attachment.FileSizeBytes,
+                            }
+                        }
+                            : [],
+                    };
+                    await Clients.Caller.SendAsync("ReceiveMessage", messageResponse);
+                    await Clients.User(recipientId).SendAsync("ReceiveMessage", messageResponse);
+                }
             }
         }
 
-        public async Task SendDepartmentMessage(string message)
+        public async Task SendDepartmentMessage(string message, long? attachmentId)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
             var callerId = Context.UserIdentifier ?? throw new Exception("UserId not found");
             var member = await _userManager.FindByIdAsync(callerId);
             if(member is null) { throw new Exception("User not Found"); }
             var deptId = member!.DepartmentId;
+
+            MessageAttachment? attachment = null;
+            if (attachmentId.HasValue)
+            {
+                attachment = await _teamDbContext.MessageAttachments.FindAsync(attachmentId.Value);
+                if (attachment is null || attachment.MessageId is not null)
+                {
+                    attachment = null;
+                }
+            }
+            var departmentMembers = await _teamDbContext.Users.Where(u => u.DepartmentId == deptId).Select(u => u.Id).ToListAsync();
+            var anyMemberOnline = _connectionManager.IsAnyDepartmentMemberOnline(departmentMembers);
+
             var newMessage = new DepartmentMessage
             {
                 SenderId = callerId,
                 DepartmentId = deptId,
                 Message = message,
                 SentAt = DateTime.UtcNow,
+                IsDelivered = anyMemberOnline,
             };
             await _teamDbContext.DepartmentMessages.AddAsync(newMessage);
             await _teamDbContext.SaveChangesAsync();
+            if (attachment is not null)
+            {
+                attachment.MessageId = newMessage.Id;
+                await _teamDbContext.SaveChangesAsync();
+            }
             var departmentMessageResponse = new DepartmentMessageResponse
             {
                 MessageId = newMessage.Id,
                 SenderId = newMessage.SenderId,
                 SenderName = $"{member.FirstName} {member.LastName}",
                 Content = newMessage.Message,
-                SentDate = newMessage.SentAt
+                SentDate = newMessage.SentAt,
+                Attachments = attachment is not null ? new List<AttachmentResponse>
+                        {
+                            new AttachmentResponse
+                            {
+                                Id = attachment.Id,
+                                BlobName = attachment.BlobName,
+                                FileName = attachment.FileName,
+                                ContentType = attachment.ContentType,
+                                FileSizeBytes = attachment.FileSizeBytes,
+                            }
+                        }
+                        : [],
             };
             await Clients.Group($"dept-{deptId}").SendAsync("ReceiveDepartmentMessage", departmentMessageResponse);
         }
@@ -197,17 +290,36 @@ namespace backend.Hubs
         public async Task MarkAsRead(string senderId)
         {
             var currentUserId = Context.UserIdentifier;
+            if (currentUserId is null) return;
             var unreadMessages = await _teamDbContext.Messages
-                .Where(m => m.SenderId == senderId && m.RecipientId == currentUserId && !m.isRead).ToListAsync();
-            if (!unreadMessages.Any())
+                .Where(m => m.SenderId == senderId && m.RecipientId == currentUserId && !m.IsRead).ToListAsync();
+            if (unreadMessages.Count == 0)
                 return;
             foreach(var unreadMessage in unreadMessages)
             {
-                unreadMessage.isRead = true;
+                unreadMessage.IsRead = true;
             }
             await _teamDbContext.SaveChangesAsync();
             await Clients.User(senderId).SendAsync("MessagesRead", unreadMessages.Select(m => m.Id).ToList());
             await Clients.Caller.SendAsync("ClearUnreadBadge");
+        }
+
+        public async Task ReadDepartmentMessage(string senderId)
+        {
+            var currentUserId = Context.UserIdentifier;
+            if (currentUserId is null) return;
+            var currentUser = await _userManager.FindByIdAsync(currentUserId);
+            var unreadMessages = await _teamDbContext.DepartmentMessages
+                .Where(m => m.SenderId == senderId && m.DepartmentId == currentUser!.DepartmentId && !m.IsRead).ToListAsync();
+            if (unreadMessages.Count == 0)
+                return;
+            foreach (var unreadMessage in unreadMessages)
+            {
+                unreadMessage.IsRead = true;
+            }
+            await _teamDbContext.SaveChangesAsync();
+            await Clients.User(senderId).SendAsync("DepartmentMessagesRead", unreadMessages.Select(m => m.Id).ToList());
+            await Clients.Caller.SendAsync("ClearUnreadDepartmentMessageBadge");
         }
     }
 }

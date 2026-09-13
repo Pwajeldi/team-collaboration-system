@@ -8,6 +8,7 @@ namespace backend.Services
         bool RemoveConnection(string userId, string connectionId);
         IEnumerable<string> GetConnections(string userId);
         IEnumerable<string> GetOnlineUserIds();
+        bool IsAnyDepartmentMemberOnline(List<string> userIds);
     }
     public class ConnectionManager : IConnectionManager
     {
@@ -48,6 +49,12 @@ namespace backend.Services
                 }
             }
             return Enumerable.Empty<string>();
+        }
+
+        public bool IsAnyDepartmentMemberOnline(List<string> userIds)
+        {
+            return userIds.Any(id => _userConnections.ContainsKey(id));
+
         }
 
         public IEnumerable<string> GetOnlineUserIds()

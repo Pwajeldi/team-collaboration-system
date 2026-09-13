@@ -18,5 +18,8 @@
         public Department Department { get; set; } = null!;
         public string Message { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
+        public ICollection<MessageAttachment> DepartmentAttachments { get; set; } = [];
+        public bool IsDelivered { get; set; } = false;
+        public bool IsRead { get; set; } = false;
     }
 }

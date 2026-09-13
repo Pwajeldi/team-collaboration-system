@@ -19,6 +19,13 @@ export const uploadAttachment = async(file: File) => {
     return response.data;
 }
 
+export const uploadDepartmentAttachment = async(file: File) => {
+    const formData = new FormData();
+    formData.append("file", file)
+    const response = await api.post<UploadAttachmentResponse>("/files/groupattachments/upload/", formData);
+    return response.data;
+}
+
 export const downloadAttachment = async(blobName: string) => {
     const response = await api.get<Blob>(`/files/attachments/download/${blobName}`, {
         responseType: "blob"

@@ -13,6 +13,10 @@ namespace backend.Controllers
     {
         private readonly IFileStorageService _fileStorageService;
         private readonly TeamDbContext _context;
+        private static readonly HashSet<string> allowedTypes = [
+            "image/png", "image/jpeg", "image/gif", "application/pdf","application/msword", 
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
 
         public filesController(IFileStorageService fileStorageService, TeamDbContext context)
         {
@@ -30,8 +34,43 @@ namespace backend.Controllers
             if (string.IsNullOrWhiteSpace(file.FileName))
                 return BadRequest("File must have a name.");
 
-            var allowedTypes = new[] { "image/png", "image/jpeg", "image/gif", "application/pdf",
-                "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" };
+            if (!allowedTypes.Contains(file.ContentType))
+                return BadRequest("File type not supported.");
+
+            using var stream = file.OpenReadStream();
+            var blobName = await _fileStorageService.UploadAsync(stream, file.FileName, file.ContentType);
+
+            var attachment = new MessageAttachment
+            {
+                MessageId = null,
+                BlobName = blobName,
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                FileSizeBytes = file.Length,
+            };
+
+            _context.MessageAttachments.Add(attachment);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                id = attachment.Id,
+                blobName = attachment.BlobName,
+                fileName = attachment.FileName,
+                contentType = attachment.ContentType,
+                fileSizeBytes = attachment.FileSizeBytes,
+            });
+        }
+
+        [HttpPost("/groupattachment/upload")]
+        [RequestSizeLimit(50 * 1024 * 1024)]
+        public async Task<IActionResult> UploadGroupChatAttatchment(IFormFile file)
+        {
+            if (file is null || file.Length == 0)
+                return BadRequest("No file provided.");
+
+            if (string.IsNullOrWhiteSpace(file.FileName))
+                return BadRequest("File must have a name.");
 
             if (!allowedTypes.Contains(file.ContentType))
                 return BadRequest("File type not supported.");

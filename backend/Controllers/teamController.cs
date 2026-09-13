@@ -177,8 +177,8 @@ namespace backend.Controllers
                     RecipientId = m.RecipientId,
                     SentDate = m.SentAt,
                     Content = m.Content ?? "",
-                    isRead = m.isRead,
-                    isDelivered = m.isDelivered,
+                    IsRead = m.IsRead,
+                    IsDelivered = m.IsDelivered,
                     Attachments = m.Attachments.Select(a => new AttachmentResponse
                     {
                         Id = a.Id,
@@ -210,7 +210,7 @@ namespace backend.Controllers
                     UserId = u.Id,
                     Email = u.Email,
                     UnreadMessages = _context.Messages.Count(m => m.RecipientId == callerId && 
-                        m.SenderId == u.Id && !m.isRead)
+                        m.SenderId == u.Id && !m.IsRead)
                 });
             var users = await query.ToListAsync();
             return Ok(users);

@@ -155,7 +155,10 @@ export interface DepartmentMessageResponse {
     senderId: string;
     senderName: string;
     content: string;
-    sentDate: string
+    sentDate: string;
+    attachments: Attachments[];
+    isRead: boolean,
+    isDelivered: boolean,
 }
 
 export interface createDepartmentDto {

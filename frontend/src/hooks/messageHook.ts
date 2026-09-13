@@ -1,5 +1,5 @@
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { loadMessages } from "../api/messageApi";
+import { loadMessages, uploadDepartmentAttachment } from "../api/messageApi";
 import type { PaginatedMessageResponse } from "../types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadAttachment, downloadAttachment, deleteAttachment } from "../api/messageApi";
@@ -20,6 +20,12 @@ export const useUploadAttachment = () => {
         mutationFn: uploadAttachment,
     });
 };
+
+export const useUploadDepartmentAttachment = () => {
+    return useMutation({
+        mutationFn: uploadDepartmentAttachment,
+    })
+}
 
 export const useDownloadAttachment = () => {
     return useMutation({

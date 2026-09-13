@@ -25,7 +25,6 @@ export const useChatSocket = () => {
     const { selectedUser, setSelectedUser } = useChat();
 
     const handleReceive = (message: MessageResponse) => {
-        console.log("received:", message);
         const isOwnEcho = message.senderId === myId;
         const conversationKey = isOwnEcho ? message.recipientId : message.senderId;
         queryClient.setQueryData(
@@ -144,6 +143,7 @@ export const useChatSocket = () => {
         connection.on("ClearUnreadBadge", clearUnreadBadge);
         connection.on("UserOnline", handleUserOnline);
         connection.on("UserOffline", handleUserOffline);
+        connection.on("ReceiveMyMessage", handleReceive);
 
         if (connection.state === signalR.HubConnectionState.Disconnected && !started.current) {
             started.current = true;
@@ -158,6 +158,7 @@ export const useChatSocket = () => {
             connection.off("ClearUnreadBadge", clearUnreadBadge);
             connection.off("UserOnline", handleUserOnline);
             connection.off("UserOffline", handleUserOffline);
+            connection.off("ReceiveMyMessage", handleReceive);
         };
     }, [selectedUser?.userId]);
 };

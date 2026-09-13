@@ -35,7 +35,7 @@ namespace backend.Services
             };
 
             await _s3Client.PutObjectAsync(request);
-            return key;
+            return key; //The stored blob name
         }
 
         public async Task<Stream> DownloadAsync(string key)

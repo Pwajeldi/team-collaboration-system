@@ -5,13 +5,26 @@ import { getConnection } from "../services/signalr";
 import { getUserId } from "../services/jwtdecode";
 import "../styles/chatPage.css";
 import Loader from "../components/loader";
-import { SendHorizonal } from "lucide-react";
+import { Check, CheckCheck, Paperclip, SendHorizonal } from "lucide-react";
+import { useUploadDepartmentAttachment } from "../hooks/messageHook";
+import toast from "react-hot-toast";
+import AttachmentPreviewChip from "../components/attachmentPreviewChip";
+import MessageAttachment from "../components/messageAttachment";
 
 const DepartmentChatPage = () => {
     const [text, setText] = useState("");
     const [sending, setSending] = useState(false);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const myId = getUserId();
     const department = sessionStorage.getItem("department");
+    const uploadAttachment = useUploadDepartmentAttachment();
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) setPendingFile(file);
+        e.target.value = "";
+    };
 
     const query = useDepartmentMessageQuery();
     const messages = query.data?.pages.flatMap(page => page.messages).reverse() ?? [];
@@ -45,10 +58,18 @@ const DepartmentChatPage = () => {
 
         setSending(true);
         try {
-            await getConnection().invoke("SendDepartmentMessage", trimmed);
+            let attachmentId: number | undefined;
+
+            if (pendingFile) {
+                const uploaded = await uploadAttachment.mutateAsync(pendingFile);
+                attachmentId = uploaded.id;
+            }
+            await getConnection().invoke("SendDepartmentMessage", trimmed, attachmentId ?? null);
             setText("");
+            setPendingFile(null);
         } catch (err) {
             console.error("Failed to send department message:", err);
+            toast.error(pendingFile ? `Failed to send attachment` : `Message failed to send`);
         } finally {
             setSending(false);
         }
@@ -81,7 +102,15 @@ const DepartmentChatPage = () => {
                                 <div className={`message-bubble ${isMine ? "mine" : "theirs"}`}>
                                     {!isMine && <div className="message-sender-name">{message.senderName}</div>}
                                     <div className="message-content">{message.content}</div>
+                                    {message.attachments?.map(attachment => (
+                                        <MessageAttachment key={attachment.id} attachment={attachment} isMine={isMine} />
+                                    ))}
                                     <span className="message-date">{formatMessageDate(message.sentDate)}</span>
+                                    {isMine && (
+                                    <span className={`read-receipt ${message.isRead ? "read" : ""}`}>
+                                        {message.isRead ? <CheckCheck size={14}/> : message.isDelivered ? <Check size={14}/> : ""}
+                                    </span>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -89,7 +118,29 @@ const DepartmentChatPage = () => {
                 </div>
             </div>
             <div className="chat-input">
+                {pendingFile && (
+                <AttachmentPreviewChip
+                    fileName={pendingFile.name}
+                    isUploading={sending && uploadAttachment.isPending}
+                    onRemove={() => setPendingFile(null)}
+                />
+                )}
                 <div className="chat-input-row">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={handleFileSelect}
+                    />
+                    <button
+                        className="chat-attach-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={sending}
+                        aria-label="Attach file"
+                        type="button"
+                    >
+                        <Paperclip size={18} />
+                    </button>
                     <input
                     type="text"
                     value={text}

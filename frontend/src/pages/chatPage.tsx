@@ -156,10 +156,7 @@ const ChatPage = () => {
                                     top:0,
                                 }}>
                                 <div className={`message-bubble ${isMine ? "mine" : "theirs"}`}>
-                                    {/* CHANGED — only renders when content is non-empty, so an
-                                        attachment-only message doesn't show a blank line above the file chip */}
                                     {message.content && <div className="message-content">{message.content}</div>}
-                                    {/* NEW — renders each attachment attached to this message, if any */}
                                     {message.attachments?.map(attachment => (
                                         <MessageAttachment key={attachment.id} attachment={attachment} isMine={isMine} />
                                     ))}
