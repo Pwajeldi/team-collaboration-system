@@ -5,7 +5,7 @@ interface RetryableRequestConfig extends InternalAxiosRequestConfig {
 }
 
 
-export const API_URL:string = "https://bride-webshots-exotic-theatre.trycloudflare.com" //import.meta.env.VITE_API_URL;
+export const API_URL:string = "https://kills-shanghai-things-membership.trycloudflare.com" //import.meta.env.VITE_API_URL;
 export const api = axios.create({
     baseURL: `${API_URL}/api`,
     withCredentials: true, // sends the httpOnly refreshToken cookie automatically on every request
