@@ -3,28 +3,71 @@ import type { CreateEventDto, EventResponse, UpdateEventDto, UpdateEventTimeDto 
 import axios from "axios";
 
 export const fetchEvents = async() => {
-    const response = await api.get<EventResponse[]>("calendar/events");
-    return response.data
+    try{
+        const response = await api.get<EventResponse[]>("calendar/events");
+        return response.data
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }  
 }
 
-
 export const createEvent = async (payload: CreateEventDto)=> {
-    const { data } = await api.post<EventResponse>("/calendar/events/create", payload);
-    return data;
+    try{
+        const { data } = await api.post<EventResponse>("/calendar/events/create", payload);
+        return data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }   
 };
 
 export const deleteEvent = async(id: string) => {
-    const {data} = await api.delete(`/calendar/events/delete`, {
-        params:{
-            eventId: id
+    try{
+        const {data} = await api.delete(`/calendar/events/delete`, {
+            params:{
+                eventId: id
+            }
+        });
+        return data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
         }
-    });
-    return data;
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }   
 }
 
 export const updateEvent = async(event: UpdateEventDto) => {
-    const {data} = await api.put<EventResponse>(`/calendar/event/update`, event);
-    return data;
+    try{
+        const {data} = await api.put<EventResponse>(`/calendar/event/update`, event);
+        return data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }   
 }
 
 export const updateEventDuration = async(eventDto: UpdateEventTimeDto) => {
@@ -38,6 +81,7 @@ export const updateEventDuration = async(eventDto: UpdateEventTimeDto) => {
         }
         else{
             console.log(error as string)
+            throw error;
         }
     }  
 }

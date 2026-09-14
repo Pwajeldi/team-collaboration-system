@@ -4,19 +4,21 @@ import "../styles/taskSummaryCard.css"
 type SummaryCardProps = {
     title: string,
     value: number | undefined,
-    description?: string,
-    icon: ReactNode
+    icon: ReactNode,
+    color: string,
+    background: string,
 }
 
-const TaskSummaryCard = ({title, value, description, icon}:SummaryCardProps) => {
+const TaskSummaryCard = ({title, value, icon, color, background}:SummaryCardProps) => {
     return(
         <div className="summary-card">
             <div className="summary-card-header">
                 <p>{title}</p>
                 {icon}
             </div>
-            <h2>{value ?? ""}</h2>
-            {description && <span>{description}</span>}
+            <div className="task-value-wrapper" style={{ backgroundColor:`${background}`}}>
+                <h2 style={{color:`${color}`}}>{value ?? ""}</h2>
+            </div>
         </div>
     )
 }

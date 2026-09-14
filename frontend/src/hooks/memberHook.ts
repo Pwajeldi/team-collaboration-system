@@ -2,6 +2,7 @@ import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query"
 import { getMember, updateMember, createMember, deleteMember, getMembers, getUsersToDM, fetchOnlineUsers, } from "../api/memberApi"
 import type { CreateMemberDto, MemberQueryParams, UpdateMemberDto } from "../types/types";
 import {useQueryClient} from "@tanstack/react-query"
+import toast from "react-hot-toast";
 
 export const useGetMember = (memberId: string) => {
     return useQuery({
@@ -24,7 +25,8 @@ export const useCreateMember = () => {
         mutationFn:(payload: CreateMemberDto) => createMember(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['members'] });
-        }
+        },
+        onError: (error) => toast.error(`${error.message}`),
     })
 };
 
@@ -34,7 +36,8 @@ export const useDeleteMember = () => {
         mutationFn: deleteMember,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['members'] });
-        }
+        },
+        onError: (error) => toast.error(`${error.message}`),
     })
 };
 
@@ -44,7 +47,8 @@ export const useUpdateMember = () => {
         mutationFn:({id, updates}: {id: string, updates: UpdateMemberDto}) => updateMember(id, updates),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['members'] });
-        }
+        },
+        onError: (error) => toast.error(`${error.message}`),
     })
 }
 

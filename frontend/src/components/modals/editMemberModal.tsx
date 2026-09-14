@@ -1,10 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { X } from "lucide-react";
-import { useUpdateMember } from "../hooks/adminhooks";
-import { useFetchDepartments } from "../hooks/departmentHook";
-import { useFetchRoles } from "../hooks/loginHook";
-import type { getMemberResponse } from "../types/types";
+import { useUpdateMember } from "../../hooks/adminhooks";
+import { useFetchDepartments } from "../../hooks/departmentHook";
+import { useFetchRoles } from "../../hooks/loginHook";
+import type { getMemberResponse } from "../../types/types";
 import "../styles/newUserForm.css";
 
 type EditMemberModalProps = {

@@ -47,7 +47,7 @@ const ChatPage = () => {
             let attachmentId: number | undefined;
             if (pendingFile) {
                 const uploaded = await uploadAttachment.mutateAsync(pendingFile);
-                attachmentId = uploaded.id;
+                attachmentId = uploaded?.id;
             }
 
             await getConnection().invoke("SendDirectMessage", selectedUser?.userId, trimmed, attachmentId ?? null);
@@ -65,7 +65,7 @@ const ChatPage = () => {
 
     const query = useMessageQuery(selectedUser?.userId ?? "");
     const messages = useMemo(() => 
-        query.data?.pages.flatMap(page => page.messages).reverse() ?? []
+        query.data?.pages.flatMap(page => page?.messages).reverse() ?? []
     , [query.data]);
     const previousMessageCount = useRef(messages.length);
 
@@ -74,7 +74,7 @@ const ChatPage = () => {
         count:messages.length,
         getScrollElement: () => scrollRef.current,
         estimateSize: () => 53,
-        getItemKey: (index) => messages[index]?.messageId,
+        getItemKey: (index) => messages[index]?.messageId ?? 0,
         overscan:5,
         anchorTo:"end",
         followOnAppend:true,
@@ -143,12 +143,12 @@ const ChatPage = () => {
                     {query.isError && <div><span>Something went wrong</span></div>}
                     {virtualizer.getVirtualItems().map(virtualItem => {
                         const message = messages[virtualItem.index];
-                        const isMine = message.senderId === myId; 
+                        const isMine = message?.senderId === myId; 
                         return(
                             <div className={`message-row ${isMine ? "mine" : "theirs"}`} 
                                 ref={virtualizer.measureElement}
                                 data-index={virtualItem.index}
-                                key={message.messageId} 
+                                key={message?.messageId} 
                                 style={{
                                     position:"absolute",
                                     transform:`translateY(${virtualItem.start}px)`,
@@ -156,11 +156,11 @@ const ChatPage = () => {
                                     top:0,
                                 }}>
                                 <div className={`message-bubble ${isMine ? "mine" : "theirs"}`}>
-                                    {message.content && <div className="message-content">{message.content}</div>}
-                                    {message.attachments?.map(attachment => (
+                                    {message?.content && <div className="message-content">{message?.content}</div>}
+                                    {message?.attachments?.map(attachment => (
                                         <MessageAttachment key={attachment.id} attachment={attachment} isMine={isMine} />
                                     ))}
-                                    <span className="message-date">{formatMessageDate(message.sentDate)}</span>
+                                    <span className="message-date">{formatMessageDate(message?.sentDate ?? "")}</span>
                                     {isMine && (
                                     <span className={`read-receipt ${message.isRead ? "read" : ""}`}>
                                         {message.isRead ? <CheckCheck size={14}/> : message.isDelivered ? <Check size={14}/> : ""}

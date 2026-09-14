@@ -10,7 +10,7 @@ namespace backend.Services
         Task CreateNewMember(CreateMemberDto dto);
         Task<GetMemberResponse> GetMember(int id);
         Task GetMembers(GetMembersDto dto);
-        Task DeleteMember(int id);
+        Task DeleteMember(string id);
     }
     public class TeamMemberService : ITeamMemberService
     {
@@ -40,14 +40,9 @@ namespace backend.Services
             {
                 throw new Exception("A user with this email already exists.");
             };
-            if (string.IsNullOrEmpty(dto.FirstName) || string.IsNullOrEmpty(dto.LastName) || 
-                string.IsNullOrEmpty(dto.Password) || string.IsNullOrEmpty(dto.ConfirmPassword))
+            if (string.IsNullOrEmpty(dto.FirstName) || string.IsNullOrEmpty(dto.LastName))
             {
                 throw new Exception("All required fields must be filled.");
-            }
-            if (dto.Password != dto.ConfirmPassword)
-            {
-                throw new Exception("Passwords do not match.");
             }
             string? relativePath = null;
             /*if (dto.picture is not null && dto.picture.Length > 0)
@@ -89,7 +84,7 @@ namespace backend.Services
 
                 try
                 {
-                    var result = await _userManager.CreateAsync(teamMember, dto.Password);
+                    var result = await _userManager.CreateAsync(teamMember);
                     if (result.Succeeded)
                     {
                         await _userManager.AddToRoleAsync(teamMember, dto.Role ?? Roles.Regular);
@@ -109,16 +104,18 @@ namespace backend.Services
                         _context.UserProfiles.Add(userProfile);
                         await _context.SaveChangesAsync();
 
+                        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(teamMember);
+
                         await _queue.QueueAsync(async (service, ct) =>
                         {
                             var emailService = service.GetRequiredService<IEmailService>();
                             try
                             {
-                                await emailService.SendEmailToNewUser(teamMember.Email, $"{teamMember.FirstName} {teamMember.LastName}", ct);
+                                await emailService.SendEmailToNewUser(teamMember.Email, $"{teamMember.FirstName} {teamMember.LastName}", resetToken, ct);
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "Unable to send email to new user");
+                                _logger.LogError(ex, "Failed to send email to new user - {Email}", dto.Email);
                             }
                         });
                     }       
@@ -131,9 +128,32 @@ namespace backend.Services
 
         }
 
-        public Task DeleteMember(int id)
+        public async Task DeleteMember(string id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var member = await _userManager.FindByIdAsync(id) 
+                    ?? throw new KeyNotFoundException("User does not exist");
+                var result = await _userManager.DeleteAsync(member);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User deleted - {User}", member.Email);
+                }
+                else
+                {
+                    throw new Exception("Unable to delete user");
+                }              
+            }
+            catch(KeyNotFoundException ex)
+            {
+                _logger.LogError("Error locating user - {Message}", ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error deleting user - {Message}", ex.InnerException);
+                throw;
+            }
         }
 
         public Task<GetMemberResponse> GetMember(int id)

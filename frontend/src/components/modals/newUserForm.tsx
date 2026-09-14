@@ -1,11 +1,11 @@
 import { useForm } from "@tanstack/react-form"
 import { X } from "lucide-react"
 import z from "zod"
-import { useCreateMember } from "../hooks/memberHook"
-import { useFetchDepartments } from "../hooks/departmentHook"
-import type { CreateMemberDto } from "../types/types"
-import "../styles/newUserForm.css"
-import { useFetchRoles } from "../hooks/loginHook"
+import { useCreateMember } from "../../hooks/memberHook"
+import { useFetchDepartments } from "../../hooks/departmentHook"
+import type { CreateMemberDto } from "../../types/types"
+import "../../styles/newUserForm.css"
+import { useFetchRoles } from "../../hooks/loginHook"
 
 type ShowUserFormProps = {
     onSuccess: () => void
@@ -24,14 +24,9 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
         jobTitle: z.string(),
         department: z.number().int().positive(),
         role: z.string(),
-        password: z.string(),
-        confirmPassword: z.string(),
         profilePicture: z.instanceof(File).refine((file) => file.size <= 1024 * 1024 * 5, "Image must be under 5MB")
             .refine((file) => file.type.startsWith("image/"), "File must be an image")
             .optional()
-    }).refine((data) => data.password === data.confirmPassword, {
-        error: "Passwords do not match",
-        path: ["confirmPassword"]
     })
 
     const form = useForm({
@@ -42,8 +37,6 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
             jobTitle: "",
             department: 0,
             role: "",
-            password: "",
-            confirmPassword: "",
             profilePicture: undefined as File | undefined
         },
         validators: {
@@ -188,39 +181,6 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
                                             </option>
                                         ))}
                                     </select>
-                                    {field.state.meta.errors.length > 0 && (
-                                        <span className="field-error">{field.state.meta.errors[0]?.message}</span>
-                                    )}
-                                </>}
-                        </form.Field>
-                    </div>
-                    <div className="new-user-group">
-                        <label htmlFor="password">Password</label>
-                        <form.Field name="password">
-                            {(field) =>
-                                <>
-                                    <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)}
-                                        id="password"
-                                        type="password"
-                                        placeholder="Enter Password"
-                                    />
-                                    {field.state.meta.errors.length > 0 && (
-                                        <span className="field-error">{field.state.meta.errors[0]?.message}</span>
-                                    )}
-                                </>
-                            }
-                        </form.Field>
-                    </div>
-                    <div className="new-user-group">
-                        <label htmlFor="confirmPassword">Confirm Password</label>
-                        <form.Field name="confirmPassword">
-                            {(field) =>
-                                <>
-                                    <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)}
-                                        id="confirmPassword"
-                                        type="password"
-                                        placeholder="Re-enter Password"
-                                    />
                                     {field.state.meta.errors.length > 0 && (
                                         <span className="field-error">{field.state.meta.errors[0]?.message}</span>
                                     )}

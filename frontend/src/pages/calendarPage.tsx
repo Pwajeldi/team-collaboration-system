@@ -8,13 +8,13 @@ import type {
     DateSelectArg, EventContentArg,
 } from "@fullcalendar/core";
 import { useGetEvents } from "../hooks/calendarHook";
-import EventFormModal from "../components/eventFormModal";
+import EventFormModal from "../components/modals/eventFormModal";
 import "../styles/calendar.css";
 import type { EventResponse, UpdateEventTimeDto } from "../types/types";
-import EventDetailModal from "../components/eventDetailModal";
+import EventDetailModal from "../components/modals/eventDetailModal";
 import Loader from "../components/loader";
 import MeetingRoom from "../components/meetingRoom";
-import UpdateEventDurationModal from "../components/eventDurationModal";
+import UpdateEventDurationModal from "../components/modals/eventDurationModal";
 import { getUserId } from "../services/jwtdecode";
 
 const Calendar = () => {
@@ -166,7 +166,6 @@ const Calendar = () => {
                 slotLabelFormat={timeFormat}
                 select={handleDateSelect}
                 eventClick={handleEventClick}
-                //eventDrop={handleEventChange}
                 eventResize={handleEventChange}
                 eventContent={renderEventContent}
                 events={calendarEvents}

@@ -3,10 +3,10 @@ import { useUpdateTaskStatus, useDeleteTask, useGetTaskSummary } from "../hooks/
 import "../styles/managerTaskPage.css"
 import { type TaskStatusType, type TaskResponse, TaskStatus, type TaskQueryParams, type TaskPriorityType } from "../types/types";
 import { CircleCheck, Clock, ListTodo, Plus, TriangleAlert } from "lucide-react";
-import TaskSummaryCard from "../components/taskSummaryCard";
-import TaskList from "../components/taskList";
-import TaskBoard from "../components/taskBoard";
-import TaskFormModal from "../components/taskFormModal";
+import TaskSummaryCard from "../components/tasks/taskSummaryCard";
+import TaskList from "../components/tasks/taskList";
+import TaskBoard from "../components/tasks/taskBoard";
+import TaskFormModal from "../components/modals/taskFormModal";
 import { TaskActionsProvider } from "../context/taskActionsContext";
 import Loader from "../components/loader";
 
@@ -24,10 +24,10 @@ const ManagerTaskPage = () => {
     const taskSummaryQuery = useGetTaskSummary();
     const [tab, setTab] = useState<"board" | "list">("board");
     const summaryCards = [
-        {title: "Total Tasks", value: taskSummaryQuery.data?.totalTasks, icon: <ListTodo/>},
-        {title: "In Progress", value: taskSummaryQuery.data?.inProgressTasks, icon: <Clock/>},
-        {title: "Completed", value: taskSummaryQuery.data?.completedTasks, icon: <CircleCheck/>},
-        {title: "Overdue", value: taskSummaryQuery.data?.overdueTasks, icon: <TriangleAlert/>},
+        {title: "Total Tasks", value: taskSummaryQuery.data?.totalTasks, icon: <ListTodo/>, color: "", background:"#F1F5F9"},
+        {title: "In Progress", value: taskSummaryQuery.data?.inProgressTasks, icon: <Clock/>, color:"#2563EB", background:"#EFF6FF"},
+        {title: "Completed", value: taskSummaryQuery.data?.completedTasks, icon: <CircleCheck/>, color: "#16A34A", background:"#c2d1c7"},
+        {title: "Overdue", value: taskSummaryQuery.data?.overdueTasks, icon: <TriangleAlert/>, color: "#DC2626", background:"#FEE2E2"},
     ]
 
     const [statusFilter, setStatusFilter] = useState<TaskStatusType | undefined>();

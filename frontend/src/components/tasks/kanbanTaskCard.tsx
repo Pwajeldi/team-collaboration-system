@@ -1,7 +1,7 @@
-import type { TaskResponse } from "../types/types"
+import type { TaskResponse } from "../../types/types"
 import "../styles/kanbanTaskCard.css"
 import TaskActionsMenu from "./taskActionMenu"
-import { useTaskActions } from "../context/taskActionsContext"
+import { useTaskActions } from "../../context/taskActionsContext"
 import { useDraggable } from "@dnd-kit/react"
 type KanbanTaskCardProps = {
     task: TaskResponse

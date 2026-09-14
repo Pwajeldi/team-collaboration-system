@@ -16,6 +16,7 @@ import RegularDashboardPage from './pages/regularDashboardPAge'
 import MyProfile from './pages/profilePage'
 import ForgotPasswordPage from './pages/forgotPAsswordPage'
 import ResetPassworPage from './pages/resetPasswordPage'
+import UserSetup from './pages/userSetupPage'
 
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
   { path: "/login", element: <LoginPage/>, handle: { title: "Login" } },
   { path: "/forgotPassword", element: <ForgotPasswordPage/>},
   { path: "/reset-password", element: <ResetPassworPage/>},
+  { path: "/account-setup", element: <UserSetup/>},
   { path: "/", element: <Navigate to="/login"/> },
   {
     element: <ProtectedRoute><AppLayout/></ProtectedRoute>,

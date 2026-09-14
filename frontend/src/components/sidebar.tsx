@@ -4,7 +4,7 @@ import "../styles/sidebar.css"
 import { useState, useRef, useEffect } from 'react';
 import { getInitials } from '../services/getInitials';
 import { stopConnection } from "../services/signalr";
-import LogoutModal from './logoutModal';
+import LogoutModal from './modals/logoutModal';
 
 type SidebarProps = {
     isCollapsed: boolean,

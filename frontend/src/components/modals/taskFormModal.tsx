@@ -1,9 +1,9 @@
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { X } from "lucide-react";
-import { TaskPriority, type TaskResponse } from "../types/types";
-import { useCreateTask, useUpdateTask, useGetAssignableMembers } from "../hooks/taskHook";
-import "../styles/taskFormModal.css";
+import { TaskPriority, type TaskResponse } from "../../types/types";
+import { useCreateTask, useUpdateTask, useGetAssignableMembers } from "../../hooks/taskHook";
+import "../../styles/taskFormModal.css";
 
 type TaskFormModalProps = {
     task?: TaskResponse;

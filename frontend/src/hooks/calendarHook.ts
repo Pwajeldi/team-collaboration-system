@@ -7,7 +7,7 @@ export const useGetEvents = () => {
     return useQuery({
         queryKey: ["events"],
         queryFn: fetchEvents,
-        placeholderData: keepPreviousData
+        placeholderData: keepPreviousData,
     });
 };
 
@@ -19,6 +19,7 @@ export const useCreateEvent = () => {
             queryClient.invalidateQueries({ queryKey: ["events"] });
             toast.success("Event created")
         },
+        onError: (error) => toast.error(`${error.message}`),
     });
 };
 

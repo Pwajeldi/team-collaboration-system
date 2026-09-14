@@ -8,7 +8,7 @@ namespace backend.Services
 {
     public interface IEmailService
     {
-        Task SendEmailToNewUser(string recipientEmail, string recipientName, CancellationToken ct = default);
+        Task SendEmailToNewUser(string recipientEmail, string recipientName, string resetToken, CancellationToken ct = default);
         Task SendEventInvite(TeamMember recipient, Event calendarEvent, bool hadOverlapAtCreation, CancellationToken ct = default);
         Task SendEventCancelledEmail(TeamMember recipient, string eventTitle, DateTime eventStart, CancellationToken ct = default);
         Task SendForgotPasswordUrl(string userEmail, string resetToken, string userName, CancellationToken ct = default);
@@ -29,9 +29,12 @@ namespace backend.Services
             _logger = logger;
         }
 
-        public async Task SendEmailToNewUser(string recipientEmail, string recipientName, CancellationToken ct = default)
+        public async Task SendEmailToNewUser(string recipientEmail, string recipientName, string resetToken, CancellationToken ct = default)
         {
-            var loginUrl = BuildUrl(_frontend.LoginPath);
+            var signUpUrl = BuildUrl(_frontend.SignUpPath).TrimEnd("/");
+            var resetUrl = $"{signUpUrl}" +
+                           $"?email={Uri.EscapeDataString(recipientEmail!)}" +
+                           $"&token={Uri.EscapeDataString(resetToken)}";
 
             var mail = BuildMessage(
                 recipientEmail,
@@ -39,8 +42,9 @@ namespace backend.Services
                 subject: "Welcome to the team",
                 body:
                     $"Hi {recipientName},\n\n" +
-                    "Your account has been created. You can log in here:\n" +
-                    $"{loginUrl}\n\n" +
+                    "Your account has been created!.\n"+
+                    "Click the link below to complete your account setup:\n\n" +
+                    $"{signUpUrl}\n\n" +
                     "Welcome aboard!"
             );
 

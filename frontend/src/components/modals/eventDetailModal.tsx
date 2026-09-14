@@ -1,10 +1,10 @@
 import { X, MapPin, Clock, User, Users, Trash2, Video, Pencil } from "lucide-react";
-import type { EventResponse } from "../types/types";
-import { useDeleteEvent } from "../hooks/calendarHook";
+import type { EventResponse } from "../../types/types";
+import { useDeleteEvent } from "../../hooks/calendarHook";
 import "../styles/eventDetailModal.css";
-import { getUserId } from "../services/jwtdecode";
+import { getUserId } from "../../services/jwtdecode";
 import { useState } from "react";
-import UpdateEventModal from "./eventUpdateModal";
+import UpdateEventModal from "../modals/eventUpdateModal";
 
 type EventDetailModalProps = {
     event: EventResponse;

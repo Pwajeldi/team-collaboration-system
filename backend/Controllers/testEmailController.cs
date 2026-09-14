@@ -31,7 +31,7 @@ namespace backend.Controllers
             var Event = await _context.Events.Include(e => e.Attendees).FirstOrDefaultAsync(e => e.Attendees.Any(ea => ea.UserId == user!.Id));
             try
             {
-                await _emailService.SendEmailToNewUser("pwajeldi900@gmail.com", "Joshua");
+                await _emailService.SendEmailToNewUser("pwajeldi900@gmail.com", "Joshua", "resetMyPAssword");
                 await _emailService.SendEventInvite(user!, Event!, true);
                 return Ok("mail sent");
             }

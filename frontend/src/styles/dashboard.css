@@ -15,7 +15,7 @@
     margin: 0;
     line-height: 1.3;
     max-width: 100%;
-    grid-column: span 4;
+    grid-column: 1/-1;
 }
 
 .summary-grid{
@@ -26,16 +26,18 @@
 }
 
 .activity-chart{
-    grid-column: span 8;
+    grid-column: span 12;
 }
 
 .status-chart{
     grid-column: span 4;
 }
 
-.today-events,
+.today-events{
+    grid-column: span 6;
+}
 .recent-messages {
-    grid-column: span 4;
+    grid-column: 7 / -1;
 }
 
 .dashboard-card {

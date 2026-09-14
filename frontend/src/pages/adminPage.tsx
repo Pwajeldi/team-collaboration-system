@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import NewUserForm from "../components/newUserForm";
-import EditMemberModal from "../components/editMemberModal";
+import NewUserForm from "../components/modals/newUserForm";
+import EditMemberModal from "../components/modals/editMemberModal";
 import AdminUsersTable from "../components/adminUsersTable";
 import { useFetchDepartments, useCreateDepartment, useDeleteDepartment } from "../hooks/departmentHook";
 import type { getMemberResponse } from "../types/types";

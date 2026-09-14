@@ -1,4 +1,4 @@
-import "../styles/logoutModal.css"
+import "../../styles/logoutModal.css"
 type LogoutModalProps = {
     onClose: () => void,
     handleLogout: () => void,

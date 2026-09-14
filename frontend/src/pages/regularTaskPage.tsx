@@ -1,12 +1,12 @@
 import { useDeleteTask, useGetTaskSummary, useUpdateTaskStatus } from "../hooks/taskHook"
 import { CircleCheck, Clock, ListTodo, TriangleAlert } from "lucide-react";
-import TaskSummaryCard from "../components/taskSummaryCard";
+import TaskSummaryCard from "../components/tasks/taskSummaryCard";
 import "../styles/regularTaskPage.css"
 import { useState } from "react";
-import TaskBoard from "../components/taskBoard";
-import TaskList from "../components/taskList";
+import TaskBoard from "../components/tasks/taskBoard";
+import TaskList from "../components/tasks/taskList";
 import { TaskStatus, type TaskPriorityType, type TaskQueryParams, type TaskResponse, type TaskStatusType } from "../types/types";
-import TaskFormModal from "../components/taskFormModal";
+import TaskFormModal from "../components/modals/taskFormModal";
 import { TaskActionsProvider } from "../context/taskActionsContext";
 import Loader from "../components/loader";
 
@@ -25,10 +25,10 @@ const RegularTaskPage = () => {
     const taskSummaryQuery = useGetTaskSummary();
     const [tab, setTab] = useState<"board" | "list">("board");
     const summaryCards = [
-        {title: "Total Tasks", value: taskSummaryQuery.data?.totalTasks, icon: <ListTodo/>},
-        {title: "In Progress", value: taskSummaryQuery.data?.inProgressTasks, icon: <Clock/>},
-        {title: "Completed", value: taskSummaryQuery.data?.completedTasks, icon: <CircleCheck/>},
-        {title: "Overdue", value: taskSummaryQuery.data?.overdueTasks, icon: <TriangleAlert/>},
+        {title: "Total Tasks", value: taskSummaryQuery.data?.totalTasks, icon: <ListTodo/>, color: "", background:"#F1F5F9"},
+        {title: "In Progress", value: taskSummaryQuery.data?.inProgressTasks, icon: <Clock/>, color: "#2563EB", background:"#EFF6FF"},
+        {title: "Completed", value: taskSummaryQuery.data?.completedTasks, icon: <CircleCheck/>, color: "#16A34A", background:"#c2d1c7"},
+        {title: "Overdue", value: taskSummaryQuery.data?.overdueTasks, icon: <TriangleAlert/>, color: "#DC2626", background:"#FEE2E2"},
     ]
     const [statusFilter, setStatusFilter] = useState<TaskStatusType | undefined>();
         const [search, setSearch] = useState("");

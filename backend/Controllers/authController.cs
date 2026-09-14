@@ -95,7 +95,7 @@ namespace backend.Controllers
             try
             {
                 await _authService.ResetPassword(dto);
-                return Ok("Your password has been saved");
+                return Ok("Password has been setup successfully");
             }
             catch (KeyNotFoundException ex)
             {

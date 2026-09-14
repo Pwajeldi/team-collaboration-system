@@ -3,13 +3,35 @@ import type { PasswordResetDto, UpdateProfileDto, UserProfileResponse } from "..
 import api from "./axios";
 
 export const getMyProfile = async () => {
-    const response = await api.get<UserProfileResponse>(`/profile/myprofile`);
-    return response.data;
+    try{
+        const response = await api.get<UserProfileResponse>(`/profile/myprofile`);
+        return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }  
 }
 
 export const deleteProfile = async () => {
-    const response = await api.delete(`/profile/delete`);
-    return response.data;
+    try{
+        const response = await api.delete(`/profile/delete`);
+        return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }  
 }
 
 export const updateMyProfile = async(payload: UpdateProfileDto) => {

@@ -138,14 +138,16 @@ namespace backend.Controllers
         {
             try
             {
-                var member = await _userManager.FindByIdAsync(id);
-                if(member == null) return Unauthorized();
-                var result = await _userManager.DeleteAsync(member);
-                return result.Succeeded ? NoContent() : Unauthorized("Unable to remove member");
+                await _service.DeleteMember(id);
+                return NoContent();
             }
-            catch(Exception ex)
+            catch (KeyNotFoundException ex)
             {
-                return BadRequest(ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {   
+                return BadRequest(ex.InnerException);
             }
         }
 

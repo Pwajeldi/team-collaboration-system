@@ -21,8 +21,6 @@ export interface CreateMemberDto{
     jobTitle: string,
     department: number,
     role: string,
-    password: string,
-    confirmPassword: string,
     profilePicture?: File,
 }
 

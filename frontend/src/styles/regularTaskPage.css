@@ -6,7 +6,7 @@
 
 .task-tabs{
     display: flex;
-    gap: 4px;
+    gap: 17px;
     padding: 4px;
     width: fit-content;
     background-color: #f1f3f5;

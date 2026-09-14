@@ -27,14 +27,14 @@ const DepartmentChatPage = () => {
     };
 
     const query = useDepartmentMessageQuery();
-    const messages = query.data?.pages.flatMap(page => page.messages).reverse() ?? [];
+    const messages = query.data?.pages.flatMap(page => page?.messages).reverse() ?? [];
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const virtualizer = useVirtualizer({
         count: messages.length,
         getScrollElement: () => scrollRef.current,
         estimateSize: () => 53,
-        getItemKey: (index) => messages[index]?.messageId,
+        getItemKey: (index) => messages[index]?.messageId ?? 0,
         overscan: 5,
         anchorTo: "end",
         followOnAppend: true,
@@ -49,20 +49,20 @@ const DepartmentChatPage = () => {
         }
     }, [virtualizer.getVirtualItems()[0]?.index, query.hasNextPage, query.isFetchingNextPage]);
 
-    const formatMessageDate = (date: string) =>
-        new Date(date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-
+    const formatMessageDate = (date: string) =>{
+        return new Date(date).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    }
+        
     const handleSendMessage = async () => {
         const trimmed = text.trim();
-        if (!trimmed || sending) return;
+        if ((!trimmed && !pendingFile) || sending) return;
 
         setSending(true);
         try {
             let attachmentId: number | undefined;
-
             if (pendingFile) {
                 const uploaded = await uploadAttachment.mutateAsync(pendingFile);
-                attachmentId = uploaded.id;
+                attachmentId = uploaded?.id;
             }
             await getConnection().invoke("SendDepartmentMessage", trimmed, attachmentId ?? null);
             setText("");
@@ -90,22 +90,22 @@ const DepartmentChatPage = () => {
                     {query.isError && <div><span>Something went wrong</span></div>}
                     {virtualizer.getVirtualItems().map(virtualItem => {
                         const message = messages[virtualItem.index];
-                        const isMine = message.senderId === myId;
+                        const isMine = message?.senderId === myId;
                         return (
                             <div
                                 className={`message-row ${isMine ? "mine" : "theirs"}`}
                                 ref={virtualizer.measureElement}
                                 data-index={virtualItem.index}
-                                key={message.messageId}
+                                key={message?.messageId}
                                 style={{ position: "absolute", transform: `translateY(${virtualItem.start}px)`, width: "100%", top: 0 }}
                             >
                                 <div className={`message-bubble ${isMine ? "mine" : "theirs"}`}>
-                                    {!isMine && <div className="message-sender-name">{message.senderName}</div>}
-                                    <div className="message-content">{message.content}</div>
-                                    {message.attachments?.map(attachment => (
+                                    {!isMine && <div className="message-sender-name">{message?.senderName}</div>}
+                                    <div className="message-content">{message?.content}</div>
+                                    {message?.attachments?.map(attachment => (
                                         <MessageAttachment key={attachment.id} attachment={attachment} isMine={isMine} />
                                     ))}
-                                    <span className="message-date">{formatMessageDate(message.sentDate)}</span>
+                                    <span className="message-date">{formatMessageDate(message?.sentDate ?? "")}</span>
                                     {isMine && (
                                     <span className={`read-receipt ${message.isRead ? "read" : ""}`}>
                                         {message.isRead ? <CheckCheck size={14}/> : message.isDelivered ? <Check size={14}/> : ""}

@@ -120,6 +120,7 @@ namespace backend.Services
                 .AsNoTracking()
                 .Include(m => m.Sender)
                 .Where(m => m.SentAt >= cutoff)
+                .Where(m => m.SenderId != user.Id)
                 .OrderByDescending(m => m.SentAt)
                 .Take(5)
                 .Select(m => new RecentMessageDto

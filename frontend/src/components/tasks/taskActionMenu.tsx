@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Pencil, Trash2 } from "lucide-react";
-import ActionButton from "./actionsButton";
-import { type TaskResponse, type TaskStatusType } from "../types/types";
+import ActionButton from "../actionsButton";
+import { type TaskResponse, type TaskStatusType } from "../../types/types";
 import "../styles/taskActionsMenu.css";
 
 type TaskActionsMenuProps = {

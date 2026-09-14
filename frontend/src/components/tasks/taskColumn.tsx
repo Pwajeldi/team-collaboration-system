@@ -1,7 +1,7 @@
-import type { TaskResponse } from "../types/types"
+import type { TaskResponse } from "../../types/types"
 import KanbanTaskCard from "./kanbanTaskCard"
 import type { StatusId, TaskStatusTitle } from "./taskBoard"
-import "../styles/taskColumn.css"
+import "../../styles/taskColumn.css"
 
 
 type TaskColumnProps = {

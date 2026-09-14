@@ -33,9 +33,7 @@ namespace backend.Dtos
         public string? JobTitle { get; set; }
         [Required] public int DepartmentId { get; set; }
         public string? Role { get; set; }
-        [Required] public required string Password { get; set; }
-        [Required] public required string ConfirmPassword { get; set; }
-        [FromForm] public  IFormFile? picture { get; set; }
+        [FromForm] public IFormFile? Picture { get; set; }
     }
 
     public class GetMemberResponse

@@ -2,6 +2,7 @@ import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { createTask, deleteTask, fetchTask, fetchTasks, fetchTaskSummary, updateTask, updateTaskStatus } from "../api/taskApi";
 import type { TaskQueryParams } from "../types/types";
 import { fetchAssignableMembers } from "../api/taskApi";
+import toast from "react-hot-toast";
 
 export const useUpdateTask = () => {
     const queryClient = useQueryClient();
@@ -10,6 +11,7 @@ export const useUpdateTask = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
         },
+        onError: (error) => toast.error(`${error.message}`),
     });
 };
 
@@ -20,6 +22,7 @@ export const useDeleteTask = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
         },
+        onError: (error) => toast.error(`${error.message}`),
     });
 };
 
@@ -45,6 +48,7 @@ export const useCreateTask = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
         },
+        onError: (error) => toast.error(`${error.message}`),
     });
 };
 
@@ -56,6 +60,7 @@ export const useUpdateTaskStatus = () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
             queryClient.invalidateQueries({queryKey: ["task-summary"]});
         },
+        onError: (error) => toast.error(`${error.message}`),
     });
 };
 

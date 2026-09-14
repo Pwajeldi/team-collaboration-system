@@ -1,12 +1,12 @@
-import { useGetTasks } from "../hooks/taskHook";
+import { useGetTasks } from "../../hooks/taskHook";
 import TaskColumn from "./taskColumn";
 import "../styles/taskBoard.css";
-import type { TaskQueryParams } from "../types/types";
-import Loader from "./loader";
-import { Droppable } from "../services/droppableBoard";
+import type { TaskQueryParams } from "../../types/types";
+import Loader from "../loader";
+import { Droppable } from "../../services/droppableBoard";
 import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
 import toast from "react-hot-toast";
-import { useTaskActions } from "../context/taskActionsContext";
+import { useTaskActions } from "../../context/taskActionsContext";
 
 
 export type TaskStatusTitle = "Not Started" | "In Progress" | "In Review" | "Completed";

@@ -56,7 +56,7 @@ const LoginPage = () => {
             <section className="login-card">
                 <header className="login-header">
                    {/* <img src="logo.svg" alt="Company Logo" /> */} 
-                    <h2>Team Collaboration System</h2>
+                    <h2>Team Sync</h2>
                     <p>Sign in to continue</p>
                 </header>
 
@@ -101,7 +101,7 @@ const LoginPage = () => {
                 </form>
 
                 <footer className="login-footer">
-                    <small>©2026 JJ Logistics</small>
+                    <small>©2026</small>
                 </footer>
             </section>
         </main>

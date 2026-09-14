@@ -3,9 +3,9 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { X, Search } from "lucide-react";
 import toast from "react-hot-toast";
-import { useCreateEvent } from "../hooks/calendarHook";
+import { useCreateEvent } from "../../hooks/calendarHook";
 import "../styles/eventFormModal.css";
-import { useGetUsers } from "../hooks/memberHook";
+import { useGetUsers } from "../../hooks/memberHook";
 
 type EventFormModalProps = {
     initialStart?: string;
