@@ -99,12 +99,16 @@ namespace backend.Controllers
             try
             {
                 await _service.CreateNewMember(dto);
+                return Created();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ex.Message);
             }
-            return Created();
         }
 
         [Authorize(Roles = "admin")]

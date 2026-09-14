@@ -2,6 +2,7 @@
 using backend.Dtos;
 using backend.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services
 {
@@ -69,62 +70,77 @@ namespace backend.Services
                 }
                 relativePath = Path.Combine("profile", "pictures", fileName);
             }*/
-                var teamMember = new TeamMember
-                {
-                    UserName = dto.Email,
-                    Email = dto.Email,
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    JobTitle = dto.JobTitle,
-                    DateJoined = DateTime.UtcNow,
-                    DepartmentId = dto.DepartmentId,
-                    ProfilePictureUrl = relativePath ?? string.Empty,
-                    IsActive = true,
-                };
+            var teamMember = new TeamMember
+            {
+                UserName = dto.Email,
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                JobTitle = dto.JobTitle,
+                DateJoined = DateTime.UtcNow,
+                DepartmentId = dto.DepartmentId,
+                ProfilePictureUrl = relativePath ?? string.Empty,
+                IsActive = true,
+            };
 
-                try
+            var creatingManager = string.Equals(Roles.Manager, dto.Role, StringComparison.OrdinalIgnoreCase);
+            var department = await _context.Departments.FirstOrDefaultAsync(d => d.Id == dto.DepartmentId);
+            var currentManagerId = department!.ManagerId;
+                
+            try
+            {
+                var result = await _userManager.CreateAsync(teamMember);
+                if (result.Succeeded)
                 {
-                    var result = await _userManager.CreateAsync(teamMember);
-                    if (result.Succeeded)
+                    await _userManager.AddToRoleAsync(teamMember, dto.Role ?? Roles.Regular);
+                    if (creatingManager)
                     {
-                        await _userManager.AddToRoleAsync(teamMember, dto.Role ?? Roles.Regular);
-                        await _context.SaveChangesAsync();
-
-                        var userProfile = new UserProfile
+                        if (currentManagerId != null)
                         {
-                            UserId = teamMember.Id,
-                            Role = dto.Role ?? Roles.Regular,
-                            FirstName = teamMember.FirstName,
-                            LastName= teamMember.LastName,
-                            Email = teamMember.Email,
-                            DateJoined = teamMember.DateJoined,
-                            DepartmentId = teamMember.DepartmentId,
-                            JobTitle = teamMember.JobTitle!,
-                        };
-                        _context.UserProfiles.Add(userProfile);
-                        await _context.SaveChangesAsync();
-
-                        var resetToken = await _userManager.GeneratePasswordResetTokenAsync(teamMember);
-
-                        await _queue.QueueAsync(async (service, ct) =>
+                            throw new InvalidOperationException("Manager already exists for the specified department");
+                        }
+                        else
                         {
-                            var emailService = service.GetRequiredService<IEmailService>();
-                            try
-                            {
-                                await emailService.SendEmailToNewUser(teamMember.Email, $"{teamMember.FirstName} {teamMember.LastName}", resetToken, ct);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Failed to send email to new user - {Email}", dto.Email);
-                            }
-                        });
-                    }       
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error creating team member.");
-                    throw new Exception("An error occurred while creating the team member.");
-                }
+                            department.ManagerId = teamMember.Id;
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+
+                    var userProfile = new UserProfile
+                    {
+                        UserId = teamMember.Id,
+                        Role = dto.Role ?? Roles.Regular,
+                        FirstName = teamMember.FirstName,
+                        LastName= teamMember.LastName,
+                        Email = teamMember.Email,
+                        DateJoined = teamMember.DateJoined,
+                        DepartmentId = teamMember.DepartmentId,
+                        JobTitle = teamMember.JobTitle!,
+                    };
+                    _context.UserProfiles.Add(userProfile);
+                    await _context.SaveChangesAsync();
+
+                    var resetToken = await _userManager.GeneratePasswordResetTokenAsync(teamMember);
+
+                    await _queue.QueueAsync(async (service, ct) =>
+                    {
+                        var emailService = service.GetRequiredService<IEmailService>();
+                        try
+                        {
+                            await emailService.SendEmailToNewUser(teamMember.Email, $"{teamMember.FirstName} {teamMember.LastName}", resetToken, ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to send email to new user - {Email}", dto.Email);
+                        }
+                    });
+                }       
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating team member.");
+                throw new Exception("An error occurred while creating the team member.");
+            }
 
         }
 

@@ -165,7 +165,7 @@ namespace backend.Data
                 .HasOne(p => p.TeamMember)
                 .WithOne(m => m.UserProfile)
                 .HasForeignKey<UserProfile>(p => p.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
