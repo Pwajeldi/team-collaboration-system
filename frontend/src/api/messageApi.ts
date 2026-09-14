@@ -46,7 +46,7 @@ export const uploadDepartmentAttachment = async(file: File) => {
     try{
         const formData = new FormData();
         formData.append("file", file)
-        const response = await api.post<UploadAttachmentResponse>("/files/groupattachments/upload/", formData);
+        const response = await api.post<UploadAttachmentResponse>("/files/groupattachments/upload", formData);
         return response.data;
     }
     catch(error: unknown){
