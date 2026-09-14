@@ -102,17 +102,28 @@ const EditMemberModal = ({ member, onClose, onSuccess }: EditMemberModalProps) =
                         <label htmlFor="department">Department</label>
                         <form.Field name="department">
                             {(field) => (
+                                <>
                                 <select
                                     id="department"
                                     value={field.state.value}
                                     onChange={(e) => field.handleChange(Number(e.target.value))}
                                     disabled={departmentsQuery.isLoading}
                                 >
-                                    {departmentsQuery.data?.map((d) => (
-                                        <option key={d.departmentId} value={d.departmentName}>{d.departmentName}</option>
-                                    ))}
+                                <option value="" disabled>
+                                    {departmentsQuery.isLoading ? "Loading departments…" : "Select a department"}
+                                </option>
+                                {departmentsQuery.data?.map((dept) => (
+                                    <option key={dept.departmentId} value={dept.departmentId}>
+                                        {dept.departmentName}
+                                    </option>
+                                ))}
                                 </select>
-                            )}
+                                {field.state.meta.errors.length > 0 && (
+                                    <span className="field-error">{field.state.meta.errors[0]?.message}</span>
+                                )}
+                                </>
+                                )
+                            }
                         </form.Field>
                     </div>
 
