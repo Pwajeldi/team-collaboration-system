@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import "../styles/taskSummaryCard.css"
+import "../../styles/taskSummaryCard.css"
 
 type SummaryCardProps = {
     title: string,

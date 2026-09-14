@@ -1,6 +1,6 @@
 import { useGetTasks } from "../../hooks/taskHook";
 import TaskColumn from "./taskColumn";
-import "../styles/taskBoard.css";
+import "../../styles/taskBoard.css";
 import type { TaskQueryParams } from "../../types/types";
 import Loader from "../loader";
 import { Droppable } from "../../services/droppableBoard";

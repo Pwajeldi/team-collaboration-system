@@ -1,6 +1,6 @@
 import { Calendar, Clock4, MoveRight, X } from "lucide-react"
 import type { UpdateEventTimeDto } from "../../types/types";
-import "../styles/eventDurationModal.css";
+import "../../styles/eventDurationModal.css";
 import { useUpdateEventDuration } from "../../hooks/calendarHook";
 import toast from "react-hot-toast";
 

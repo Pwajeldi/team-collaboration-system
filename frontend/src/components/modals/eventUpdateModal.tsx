@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { X, Search } from "lucide-react";
 import {  useUpdateEvent } from "../../hooks/calendarHook";
-import "../styles/eventFormModal.css";
+import "../../styles/eventFormModal.css";
 import { useGetUsers } from "../../hooks/memberHook";
 import type { EventResponse, UpdateEventDto } from "../../types/types";
 import toast from "react-hot-toast";
