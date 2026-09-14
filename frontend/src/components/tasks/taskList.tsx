@@ -1,11 +1,11 @@
 import { columnFilteringFeature, coreRowModelsFeature, createColumnHelper, FlexRender, rowPaginationFeature, rowSelectionFeature, rowSortingFeature, tableFeatures, useTable } from "@tanstack/react-table";
 import { CircleAlert } from "lucide-react";
-import { useGetTasks } from "../hooks/taskHook";
-import { TaskStatus, type TaskQueryParams, type TaskResponse, type TaskStatusType } from "../types/types";
-import { getUserId } from "../services/jwtdecode";
-import "../styles/tasksPage.css";
+import { useGetTasks } from "../../hooks/taskHook";
+import { TaskStatus, type TaskQueryParams, type TaskResponse, type TaskStatusType } from "../../types/types";
+import { getUserId } from "../../services/jwtdecode";
+import "../../styles/tasksPage.css";
 import TaskActionsMenu from "./taskActionMenu";
-import { getTaskActions } from "../services/getTaskActions";
+import { getTaskActions } from "../../services/getTaskActions";
 
 const features = tableFeatures({
     columnFilteringFeature,

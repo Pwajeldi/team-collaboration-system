@@ -1,6 +1,6 @@
 import { useDroppable } from "@dnd-kit/react";
 import type { ReactNode } from "react";
-import type { StatusId } from "../components/taskBoard";
+import type { StatusId } from "../components/tasks/taskBoard";
 
 type DroppableProps = {
     id: StatusId
