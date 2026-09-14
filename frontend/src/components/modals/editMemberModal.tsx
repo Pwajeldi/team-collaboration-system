@@ -5,7 +5,7 @@ import { useUpdateMember } from "../../hooks/adminhooks";
 import { useFetchDepartments } from "../../hooks/departmentHook";
 import { useFetchRoles } from "../../hooks/loginHook";
 import type { getMemberResponse } from "../../types/types";
-import "../styles/newUserForm.css";
+import "../../styles/newUserForm.css";
 
 type EditMemberModalProps = {
     member: getMemberResponse;

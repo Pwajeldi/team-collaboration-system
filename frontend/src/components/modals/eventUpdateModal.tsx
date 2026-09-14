@@ -46,7 +46,7 @@ const UpdateEventModal = ({ event, onClose}: EventFormModalProps) => {
     console.log(
     "Mapped user IDs:",
     event.attendees.map(a => a.userId)
-);
+    );
 
     const form = useForm({
         defaultValues: {
