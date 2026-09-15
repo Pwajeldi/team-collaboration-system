@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FK_Fixes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -70,7 +70,7 @@ namespace backend.Migrations
                     JobTitle = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateJoined = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProfilePictureBlobName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -342,6 +342,29 @@ namespace backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserProfilePictures",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    BlobName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileSizeBytes = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfilePictures", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserProfilePictures_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserProfiles",
                 columns: table => new
                 {
@@ -361,7 +384,7 @@ namespace backend.Migrations
                     GithubUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Xurl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FacebookUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProfilePictureBlobName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -407,7 +430,7 @@ namespace backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     HostId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -481,7 +504,7 @@ namespace backend.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MeetingAttendees_Meetings_MeetingId",
                         column: x => x.MeetingId,
@@ -590,7 +613,8 @@ namespace backend.Migrations
                 name: "IX_Meetings_EventId",
                 table: "Meetings",
                 column: "EventId",
-                unique: true);
+                unique: true,
+                filter: "[EventId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Meetings_HostId",
@@ -650,6 +674,13 @@ namespace backend.Migrations
                 column: "AssignedToId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserProfilePictures_UserId",
+                table: "UserProfilePictures",
+                column: "UserId",
+                unique: true,
+                filter: "[UserId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserProfiles_UserId",
                 table: "UserProfiles",
                 column: "UserId",
@@ -689,6 +720,9 @@ namespace backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tasks");
+
+            migrationBuilder.DropTable(
+                name: "UserProfilePictures");
 
             migrationBuilder.DropTable(
                 name: "UserProfiles");

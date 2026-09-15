@@ -309,7 +309,7 @@ namespace backend.Migrations
                     b.Property<DateTime?>("EndedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EventId")
+                    b.Property<Guid?>("EventId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("HostId")
@@ -326,7 +326,8 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EventId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[EventId] IS NOT NULL");
 
                     b.HasIndex("HostId");
 
@@ -604,7 +605,7 @@ namespace backend.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ProfilePictureUrl")
+                    b.Property<string>("ProfilePictureBlobName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
@@ -681,7 +682,7 @@ namespace backend.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ProfilePictureUrl")
+                    b.Property<string>("ProfilePictureBlobName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
@@ -701,6 +702,41 @@ namespace backend.Migrations
                         .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("UserProfiles");
+                });
+
+            modelBuilder.Entity("backend.Models.UserProfilePicture", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BlobName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("UserProfilePictures");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -810,8 +846,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.Event", "Event")
                         .WithOne("Meeting")
                         .HasForeignKey("backend.Models.Meeting", "EventId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("backend.Models.TeamMember", "Host")
                         .WithMany("HostedMeetings")
@@ -835,7 +870,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "User")
                         .WithMany("MeetingAttendees")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Meeting");
@@ -931,6 +966,16 @@ namespace backend.Migrations
                     b.Navigation("TeamMember");
                 });
 
+            modelBuilder.Entity("backend.Models.UserProfilePicture", b =>
+                {
+                    b.HasOne("backend.Models.TeamMember", "User")
+                        .WithOne("ProfilePicture")
+                        .HasForeignKey("backend.Models.UserProfilePicture", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("backend.Models.Department", b =>
                 {
                     b.Navigation("Members");
@@ -969,6 +1014,8 @@ namespace backend.Migrations
                     b.Navigation("HostedMeetings");
 
                     b.Navigation("MeetingAttendees");
+
+                    b.Navigation("ProfilePicture");
 
                     b.Navigation("ReceivedMessages");
 

@@ -111,6 +111,7 @@ builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IMeetingHubService, MeetingHubService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 builder.Services.AddSignalR(options =>
 {

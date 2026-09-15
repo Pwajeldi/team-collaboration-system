@@ -13,7 +13,7 @@ namespace backend.Services
         private readonly TeamDbContext _context;
         private readonly IFileStorageService _storageService;
 
-        public FileService(TeamDbContext context, CloudflareR2StorageService storageService)
+        public FileService(TeamDbContext context, IFileStorageService storageService)
         {
             _context = context;
             _storageService = storageService;

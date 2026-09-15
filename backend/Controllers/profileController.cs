@@ -16,15 +16,12 @@ namespace backend.Controllers
     public class profileController : ControllerBase
     {
         private readonly IProfileService _profileService;
-        private readonly UserManager<TeamMember> _userManager;
         private readonly TeamDbContext _context;
         private readonly IFileStorageService _storageService;
 
-        public profileController(IProfileService profileService, IFileStorageService storageService, TeamDbContext context,
-            UserManager<TeamMember> userManager)
+        public profileController(IProfileService profileService, IFileStorageService storageService, TeamDbContext context)
         {
             _profileService = profileService;
-            _userManager = userManager;
             _storageService = storageService;
             _context = context;
         }

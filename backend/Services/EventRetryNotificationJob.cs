@@ -9,9 +9,9 @@ namespace backend.Services
     public class EventNotificationRetryJob : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger _logger;
-        private readonly BackgroundTaskQueue _backgroundTaskQueue;
-        public EventNotificationRetryJob(IServiceScopeFactory scopeFactory, ILogger logger, BackgroundTaskQueue backgroundTaskQueue)
+        private readonly ILogger<EventNotificationRetryJob> _logger;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+        public EventNotificationRetryJob(IServiceScopeFactory scopeFactory, ILogger<EventNotificationRetryJob> logger, IBackgroundTaskQueue backgroundTaskQueue)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
