@@ -201,7 +201,6 @@ namespace backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SenderId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("SentAt")
@@ -245,7 +244,6 @@ namespace backend.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("OrganizerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Start")
@@ -435,11 +433,9 @@ namespace backend.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RecipientId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("SenderId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("SentAt")
@@ -480,7 +476,6 @@ namespace backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -488,7 +483,8 @@ namespace backend.Migrations
                     b.HasIndex("MemberId");
 
                     b.HasIndex("UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -668,6 +664,9 @@ namespace backend.Migrations
                     b.Property<string>("GithubUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -690,7 +689,6 @@ namespace backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Xurl")
@@ -699,7 +697,8 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("UserProfiles");
                 });
@@ -766,8 +765,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "Sender")
                         .WithMany("DepartmentMessagesSent")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
 
@@ -779,8 +777,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "Organizer")
                         .WithMany()
                         .HasForeignKey("OrganizerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("backend.Models.TeamMember", null)
                         .WithMany("Events")
@@ -800,7 +797,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");
@@ -813,13 +810,13 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.Event", "Event")
                         .WithOne("Meeting")
                         .HasForeignKey("backend.Models.Meeting", "EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("backend.Models.TeamMember", "Host")
                         .WithMany("HostedMeetings")
                         .HasForeignKey("HostId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Event");
@@ -838,7 +835,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "User")
                         .WithMany("MeetingAttendees")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Meeting");
@@ -848,14 +845,17 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.MessageAttachment", b =>
                 {
-                    b.HasOne("backend.Models.DepartmentMessage", null)
+                    b.HasOne("backend.Models.DepartmentMessage", "DepartmentMessage")
                         .WithMany("DepartmentAttachments")
-                        .HasForeignKey("DepartmentMessageId");
+                        .HasForeignKey("DepartmentMessageId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("backend.Models.Messages", "Message")
                         .WithMany("Attachments")
                         .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("DepartmentMessage");
 
                     b.Navigation("Message");
                 });
@@ -865,14 +865,12 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "Recipient")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("backend.Models.TeamMember", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Recipient");
 
@@ -888,8 +886,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", null)
                         .WithOne("RefreshToken")
                         .HasForeignKey("backend.Models.RefreshToken", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Member");
                 });
@@ -929,8 +926,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.TeamMember", "TeamMember")
                         .WithOne("UserProfile")
                         .HasForeignKey("backend.Models.UserProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("TeamMember");
                 });

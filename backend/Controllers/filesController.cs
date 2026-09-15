@@ -1,6 +1,7 @@
 ﻿using backend.Data;
 using backend.Models;
 using backend.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -13,15 +14,23 @@ namespace backend.Controllers
     {
         private readonly IFileStorageService _fileStorageService;
         private readonly TeamDbContext _context;
+        private readonly IFileService _fileService;
+        private readonly UserManager<TeamMember> _userManager;
         private static readonly HashSet<string> allowedTypes = [
             "image/png", "image/jpeg", "image/gif", "application/pdf","application/msword", 
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         ];
+        private static readonly HashSet<string> allowedPictureTypes = [
+           "image/png", "image/jpeg", "image/gif",
+        ];
 
-        public filesController(IFileStorageService fileStorageService, TeamDbContext context)
+
+        public filesController(IFileStorageService fileStorageService, UserManager<TeamMember> userManager, TeamDbContext context, IFileService fileService)
         {
             _fileStorageService = fileStorageService;
             _context = context;
+            _fileService = fileService;
+            _userManager = userManager;
         }
 
         [HttpPost("attachments/upload")]
@@ -62,7 +71,7 @@ namespace backend.Controllers
             });
         }
 
-        [HttpPost("/groupattachment/upload")]
+        [HttpPost("groupfiles/upload")]
         [RequestSizeLimit(50 * 1024 * 1024)]
         public async Task<IActionResult> UploadGroupChatAttatchment(IFormFile file)
         {
@@ -80,7 +89,7 @@ namespace backend.Controllers
 
             var attachment = new MessageAttachment
             {
-                MessageId = null,
+                DepartmentMessageId = null,
                 BlobName = blobName,
                 FileName = file.FileName,
                 ContentType = file.ContentType,
@@ -124,22 +133,83 @@ namespace backend.Controllers
         {
             var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (callerId is null) return Unauthorized();
-
-            var attachment = await _context.MessageAttachments
-                .Include(a => a.Message)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (attachment is null) return NotFound();
-
-            if (attachment.Message!.SenderId != callerId)
-                return Forbid();
-
-            await _fileStorageService.DeleteAsync(attachment.BlobName);
-            _context.MessageAttachments.Remove(attachment);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try
+            {
+                await _fileService.DeleteAttachment(callerId, id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
+        [HttpPost("profile/picture/upload")]
+        [RequestSizeLimit(50 * 1024 * 1024)]
+        public async Task<IActionResult> UploadProfilePicture(IFormFile picture)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null) return Unauthorized("Invalid user");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null) return Unauthorized();
+
+            if (picture is null || picture.Length == 0)
+                return BadRequest("No file provided.");
+
+            if (string.IsNullOrWhiteSpace(picture.FileName))
+                return BadRequest("File must have a name.");
+
+            if (!allowedPictureTypes.Contains(picture.ContentType))
+                return BadRequest("File type not supported.");
+
+            var existingProfilePicture = await _context.UserProfilePictures
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if(existingProfilePicture is null)
+            {
+                using var stream = picture.OpenReadStream();
+                var blobName = await _fileStorageService.UploadAsync(stream, picture.FileName, picture.ContentType);
+
+                var profilePicture = new UserProfilePicture
+                {
+                    UserId = userId,
+                    BlobName = blobName,
+                    FileName = picture.FileName,
+                    ContentType = picture.ContentType,
+                    FileSizeBytes = picture.Length,
+                };
+                await _context.UserProfilePictures.AddAsync(profilePicture);
+                await _context.SaveChangesAsync();
+
+                var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+                if (profile is not null)
+                {
+                    profile.ProfilePictureBlobName = profilePicture.BlobName;
+                }
+                user.ProfilePictureBlobName = profilePicture.BlobName;
+                await _context.SaveChangesAsync();
+                return Ok("Profile has been uploaded");
+            }
+            else
+            {
+                await _fileStorageService.DeleteAsync(existingProfilePicture.BlobName);
+                using var stream = picture.OpenReadStream();
+                var blobName = await _fileStorageService.UploadAsync(stream, picture.FileName, picture.ContentType);
+                existingProfilePicture.BlobName = blobName;
+                existingProfilePicture.FileName = picture.FileName;
+                existingProfilePicture.ContentType = picture.ContentType;
+                await _context.SaveChangesAsync();
+                return Ok("Uploaded profile image");
+            }
+        }
     }
 }

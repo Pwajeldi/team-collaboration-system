@@ -3,7 +3,7 @@
     public class UserProfile
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public string UserId { get; set; } = string.Empty;
+        public string? UserId { get; set; } = string.Empty;
         public TeamMember TeamMember { get; set; } = null!;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -19,6 +19,7 @@
         public string? GithubUrl { get; set; }
         public string? Xurl { get; set; }
         public string? FacebookUrl { get; set; }
-        public string? ProfilePictureUrl { get; set; }
+        public string? ProfilePictureBlobName { get; set; }
+        public bool IsActive { get; set; }
     }
 }

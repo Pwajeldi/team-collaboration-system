@@ -3,7 +3,7 @@
     public class Meeting
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid EventId { get; set; } // our FK to Event
+        public Guid? EventId { get; set; } // our FK to Event
         public Event Event { get; set; } = null!;
         public string HostId { get; set; } = string.Empty;
         public TeamMember Host { get; set; } = null!;

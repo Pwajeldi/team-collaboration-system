@@ -5,9 +5,9 @@
         public long MessageId { get; set; }
         public string Content { get; set; } = string.Empty;
         public DateTime SentDate { get; set; }
-        public string SenderId { get; set; } = string.Empty;
-        public string RecipientId { get; set; } = string.Empty;
-        public string SenderName {  get; set; } = string.Empty;
+        public string? SenderId { get; set; } = string.Empty;
+        public string? RecipientId { get; set; } = string.Empty;
+        public string? SenderName {  get; set; } = string.Empty;
         public bool IsRead { get; set; }
         public bool IsDelivered { get; set; }
         public List<AttachmentResponse> Attachments { get; set; } = [];
@@ -19,8 +19,8 @@
         public long MessageId { get; set; }
         public string Content { get; set; } = string.Empty;
         public DateTime SentDate { get; set; }
-        public required string SenderId { get; set; }
-        public required string SenderName { get; set; }
+        public string? SenderId { get; set; }
+        public string? SenderName { get; set; }
         public List<AttachmentResponse> Attachments { get; set; } = [];
         public bool IsRead { get; set; }
         public bool IsDelivered { get; set; }

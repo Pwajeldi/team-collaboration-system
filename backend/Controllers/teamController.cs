@@ -52,7 +52,7 @@ namespace backend.Controllers
                 DateJoined = m.DateJoined,
                 JobTitle = m.JobTitle!,
                 Department = m.Department.DepartmentName,
-                ProfilePictureUrl = m.ProfilePictureUrl ?? "",
+                ProfilePictureUrl = "",//I'll get back to you too
             }).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
             var hasNextPage = page < totalPages;
             var response = new PaginatedResponse<GetMemberResponse>
@@ -84,7 +84,7 @@ namespace backend.Controllers
                 DateJoined = member.DateJoined,
                 JobTitle = member.JobTitle!,
                 Department = member.Department.DepartmentName,
-                ProfilePictureUrl = member.ProfilePictureUrl ?? string.Empty
+                ProfilePictureUrl = string.Empty // I'll get back to you
             };
             return Ok(response);
         }
@@ -155,6 +155,21 @@ namespace backend.Controllers
             }
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpDelete("dactivate/{id}")]
+        public async Task<IActionResult> DeactivateUser(string userId)
+        {
+            try
+            {
+                await _service.DeactivateUser(userId);
+                return Ok("User has been deactivated");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("messages")]
         public async Task<IActionResult> GetMessages([FromQuery]string otherUserId, [FromQuery]string? encodedCursor)
         {
@@ -179,7 +194,7 @@ namespace backend.Controllers
                 {
                     MessageId = m.Id,
                     SenderId = m.SenderId,
-                    SenderName = $"{m.Sender.FirstName} {m.Sender.LastName}",
+                    SenderName = m.Sender != null ? $"{m.Sender.FirstName} {m.Sender.LastName}" : "Deleted User",
                     RecipientId = m.RecipientId,
                     SentDate = m.SentAt,
                     Content = m.Content ?? "",

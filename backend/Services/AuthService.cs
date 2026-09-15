@@ -113,7 +113,7 @@ namespace backend.Services
             {
                 throw new Exception("Invalid or expired token");
             }
-            var userId = storedtoken.UserId;
+            var userId = storedtoken.UserId ?? throw new Exception("Token does not match user");
             var user = await _userManager.FindByIdAsync(userId) ?? throw new KeyNotFoundException("Invalid user");
             storedtoken.Revoked = true;
             _teamDbContext.RefreshTokens.Update(storedtoken);
@@ -136,7 +136,8 @@ namespace backend.Services
 
         public async Task<LoginResponse> LoginUser(LoginDto dto)
         {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
+            var user = await _userManager.FindByEmailAsync(dto.Email) ?? throw new KeyNotFoundException("Invalid account");
+            if (!user.IsActive) throw new UnauthorizedAccessException("This account has been deactivated");
             if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
                 throw new UnauthorizedAccessException("Invalid username or password.");
             var role = await _userManager.GetRolesAsync(user);

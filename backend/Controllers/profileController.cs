@@ -1,7 +1,11 @@
-﻿using backend.Dtos;
+﻿using backend.Data;
+using backend.Dtos;
+using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace backend.Controllers
@@ -12,10 +16,17 @@ namespace backend.Controllers
     public class profileController : ControllerBase
     {
         private readonly IProfileService _profileService;
+        private readonly UserManager<TeamMember> _userManager;
+        private readonly TeamDbContext _context;
+        private readonly IFileStorageService _storageService;
 
-        public profileController(IProfileService profileService)
+        public profileController(IProfileService profileService, IFileStorageService storageService, TeamDbContext context,
+            UserManager<TeamMember> userManager)
         {
             _profileService = profileService;
+            _userManager = userManager;
+            _storageService = storageService;
+            _context = context;
         }
 
         [HttpGet("myprofile")]
@@ -103,6 +114,21 @@ namespace backend.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet("mypicture")]
+        public async Task<IActionResult> GetMyProfilePicture()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null) return Unauthorized();
+
+            var userProfilePicture = await _context.UserProfilePictures
+                .FirstOrDefaultAsync(p => p.UserId ==  userId);
+
+            if (userProfilePicture is null) return BadRequest("Upload profile picture");
+
+            var profilePictureStream = await _storageService.DownloadAsync(userProfilePicture.BlobName);
+            return File(profilePictureStream, userProfilePicture.ContentType);
         }
     }
 }

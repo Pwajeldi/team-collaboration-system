@@ -24,9 +24,6 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
         jobTitle: z.string(),
         department: z.number().int().positive(),
         role: z.string(),
-        profilePicture: z.instanceof(File).refine((file) => file.size <= 1024 * 1024 * 5, "Image must be under 5MB")
-            .refine((file) => file.type.startsWith("image/"), "File must be an image")
-            .optional()
     })
 
     const form = useForm({
@@ -37,7 +34,6 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
             jobTitle: "",
             department: 0,
             role: "",
-            profilePicture: undefined as File | undefined
         },
         validators: {
             onSubmit: userSchema as any, //revisit soon
@@ -185,31 +181,6 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
                                         <span className="field-error">{field.state.meta.errors[0]?.message}</span>
                                     )}
                                 </>}
-                        </form.Field>
-                    </div>
-                    <div className="new-user-group new-user-group-full">
-                        <label htmlFor="profilePicture">Profile Picture</label>
-                        <form.Field name="profilePicture">
-                            {(field) => (
-                                <>
-                                    <input
-                                        id="profilePicture"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => field.handleChange(e.target.files?.[0])}
-                                    />
-                                    {field.state.value && (
-                                        <img
-                                            src={URL.createObjectURL(field.state.value)}
-                                            alt="Preview"
-                                            className="profile-preview"
-                                        />
-                                    )}
-                                    {field.state.meta.errors.length > 0 && (
-                                        <span className="field-error">{field.state.meta.errors[0]?.message}</span>
-                                    )}
-                                </>
-                            )}
                         </form.Field>
                     </div>
 

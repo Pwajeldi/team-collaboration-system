@@ -12,8 +12,8 @@
     public class DepartmentMessage
     {
         public long Id { get; set; }
-        public string SenderId { get; set; } = string.Empty;
-        public TeamMember Sender { get; set; } = null!;
+        public string? SenderId { get; set; }
+        public TeamMember? Sender { get; set; }
         public int DepartmentId { get; set; }
         public Department Department { get; set; } = null!;
         public string Message { get; set; } = string.Empty;

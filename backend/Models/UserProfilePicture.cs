@@ -1,12 +1,10 @@
 ﻿namespace backend.Models
 {
-    public class MessageAttachment
+    public class UserProfilePicture
     {
         public long Id { get; set; }
-        public long? MessageId { get; set; }
-        public Messages? Message { get; set; }
-        public long? DepartmentMessageId { get; set; }
-        public DepartmentMessage? DepartmentMessage { get; set; }
+        public string? UserId { get; set; }
+        public TeamMember? User { get; set; }
         public string BlobName { get; set; } = string.Empty;
         public string FileName { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;

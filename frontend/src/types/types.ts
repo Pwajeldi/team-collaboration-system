@@ -21,7 +21,6 @@ export interface CreateMemberDto{
     jobTitle: string,
     department: number,
     role: string,
-    profilePicture?: File,
 }
 
 export interface PagedMembersResponse{
@@ -62,7 +61,7 @@ export interface UploadAttachmentResponse{
 
 export interface MessageResponse{
     messageId: number,
-    senderId: string,
+    senderId: string | null,
     senderName: string,
     recipientId: string,
     content: string,
@@ -150,7 +149,7 @@ export interface TaskQueryParams {
 
 export interface DepartmentMessageResponse {
     messageId: number;
-    senderId: string;
+    senderId: string | null;
     senderName: string;
     content: string;
     sentDate: string;
@@ -215,14 +214,6 @@ export interface UpdateEventTimeDto{
     eventId: string,
     newStartTime: string,
     newEndTime: string,
-}
-
-export interface DepartmentMessageResponse {
-    messageId: number;
-    content: string;
-    sentDate: string;
-    senderId: string;
-    senderName: string;
 }
 
 export interface PaginatedDepartmentMessageResponse {

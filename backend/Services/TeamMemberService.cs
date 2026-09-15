@@ -12,6 +12,7 @@ namespace backend.Services
         Task<GetMemberResponse> GetMember(int id);
         Task GetMembers(GetMembersDto dto);
         Task DeleteMember(string id);
+        Task DeactivateUser(string userId);
     }
     public class TeamMemberService : ITeamMemberService
     {
@@ -45,31 +46,6 @@ namespace backend.Services
             {
                 throw new Exception("All required fields must be filled.");
             }
-            string? relativePath = null;
-            /*if (dto.picture is not null && dto.picture.Length > 0)
-            {
-                var extension = Path.GetExtension(dto.picture!.FileName).ToLowerInvariant();
-                if (!validImageFormats.Contains(extension))
-                {
-                    throw new Exception("Invalid image format.");
-                }
-                if (dto.picture.Length > maxImageSize)
-                {
-                    throw new Exception("Image size exceeds 5_MB.");
-                }
-                var fileName = $"{Guid.NewGuid()}{extension}";
-                var pictureFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile", "pictures");
-                if (!Directory.Exists(pictureFolder))
-                {
-                    Directory.CreateDirectory(pictureFolder);
-                }
-                var picturePath = Path.Combine(pictureFolder, fileName);
-                using (var stream = new FileStream(picturePath, FileMode.Create))
-                {
-                    await dto.picture.CopyToAsync(stream);
-                }
-                relativePath = Path.Combine("profile", "pictures", fileName);
-            }*/
             var teamMember = new TeamMember
             {
                 UserName = dto.Email,
@@ -79,7 +55,6 @@ namespace backend.Services
                 JobTitle = dto.JobTitle,
                 DateJoined = DateTime.UtcNow,
                 DepartmentId = dto.DepartmentId,
-                ProfilePictureUrl = relativePath ?? string.Empty,
                 IsActive = true,
             };
 
@@ -116,6 +91,7 @@ namespace backend.Services
                         DateJoined = teamMember.DateJoined,
                         DepartmentId = teamMember.DepartmentId,
                         JobTitle = teamMember.JobTitle!,
+                        IsActive = teamMember.IsActive,
                     };
                     _context.UserProfiles.Add(userProfile);
                     await _context.SaveChangesAsync();
@@ -144,12 +120,35 @@ namespace backend.Services
 
         }
 
+        public async Task DeactivateUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new KeyNotFoundException("User does not exist");
+            user.IsActive = false;
+            user.UserName = $"deleted_{user.Email}";
+        }
+
         public async Task DeleteMember(string id)
         {
             try
             {
                 var member = await _userManager.FindByIdAsync(id) 
                     ?? throw new KeyNotFoundException("User does not exist");
+                await _context.Messages
+                    .Where(m => m.SenderId == member.Id)
+                    .ExecuteUpdateAsync(s => s.SetProperty(m => m.SenderId, (string?)null));
+
+                await _context.Messages
+                    .Where(m => m.RecipientId == member.Id)
+                    .ExecuteUpdateAsync(s => s.SetProperty(m => m.RecipientId, (string?)null));
+
+                await _context.DepartmentMessages
+                    .Where(dm => dm.SenderId == member.Id)
+                    .ExecuteUpdateAsync(s => s.SetProperty(dm => dm.SenderId, (string?)null));
+
+                await _context.Events
+                    .Where(e => e.OrganizerId == member.Id)
+                    .ExecuteUpdateAsync(e => e.SetProperty(e => e.OrganizerId, (string?)null));
+
                 var result = await _userManager.DeleteAsync(member);
                 if (result.Succeeded)
                 {
@@ -177,7 +176,7 @@ namespace backend.Services
             throw new NotImplementedException();
         }
 
-        public Task GetMembers(GetMembersDto sdto)
+        public async Task GetMembers(GetMembersDto sdto)
         {
             throw new NotImplementedException();
         }

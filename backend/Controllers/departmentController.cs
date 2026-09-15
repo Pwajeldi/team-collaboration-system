@@ -76,6 +76,7 @@ namespace backend.Controllers
 
             var query = _context.DepartmentMessages
                 .Include(m => m.Sender)
+                .Include(m => m.DepartmentAttachments)
                 .Where(dm => dm.DepartmentId == user.DepartmentId)
                 .AsQueryable();
 
@@ -85,27 +86,28 @@ namespace backend.Controllers
                 query = query.Where(dm => (dm.SentAt < cursor.SentAt) || (dm.SentAt == cursor.SentAt && dm.Id < cursor.Id));
             }
 
-            var messages = await query.OrderByDescending(dm => dm.SentAt).ThenByDescending(dm => dm.Id)
-                                .Select(dm => new DepartmentMessageResponse
-                                {
-                                    MessageId = dm.Id,
-                                    SenderId = dm.SenderId,
-                                    SenderName = dm.Sender.FirstName,
-                                    Content = dm.Message,
-                                    SentDate = dm.SentAt,
-                                    IsRead = dm.IsRead,
-                                    IsDelivered = dm.IsDelivered,
-                                    Attachments = dm.DepartmentAttachments.Select(dm => new AttachmentResponse
-                                    {
-                                        Id = dm.Id,
-                                        BlobName = dm.BlobName,
-                                        ContentType = dm.ContentType,
-                                        FileName = dm.FileName,
-                                        FileSizeBytes = dm.FileSizeBytes,
-                                    }).ToList(),
-                                })
-                                .Take(pageSize + 1)
-                                .ToListAsync();
+            var messages = await query
+                .OrderByDescending(dm => dm.SentAt).ThenByDescending(dm => dm.Id)
+                .Select(dm => new DepartmentMessageResponse
+                {
+                    MessageId = dm.Id,
+                    SenderId = dm.SenderId,
+                    SenderName = dm.Sender != null ? dm.Sender.FirstName : "Deleted User",
+                    Content = dm.Message,
+                    SentDate = dm.SentAt,
+                    IsRead = dm.IsRead,
+                    IsDelivered = dm.IsDelivered,
+                    Attachments = dm.DepartmentAttachments.Select(at => new AttachmentResponse
+                    {
+                        Id = at.Id,
+                        BlobName = at.BlobName,
+                        ContentType = at.ContentType,
+                        FileName = at.FileName,
+                        FileSizeBytes = at.FileSizeBytes,
+                    }).ToList(),
+                })
+                .Take(pageSize + 1)
+                .ToListAsync();
             bool hasMore = messages.Count > pageSize;
             if (hasMore) messages.RemoveAt(messages.Count - 1);
             string? nextCursor = hasMore && messages.Count > 0

@@ -48,7 +48,7 @@ namespace backend.Services
             };
 
             var conflictedUserIds = await _context.Events
-                .Where(e => dto.AttendeeIds.Contains(e.OrganizerId) || e.Attendees.Any(a => dto.AttendeeIds.Contains(a.UserId)))
+                .Where(e => dto.AttendeeIds.Contains(e.OrganizerId ?? "") || e.Attendees.Any(a => dto.AttendeeIds.Contains(a.UserId)))
                 .Where(e => e.Start < dto.End && e.End > dto.Start)
                 .SelectMany(e => e.Attendees.Select(a => a.UserId))
                 .ToListAsync();
@@ -125,6 +125,11 @@ namespace backend.Services
                 .Include(e => e.Attendees)
                 .ThenInclude(e => e.User)
                 .FirstOrDefaultAsync(e => e.Id == eventId) ?? throw new KeyNotFoundException("Event does not exist");
+
+            await _context.Meetings
+                .Where(m => m.EventId == eventToDelete.Id)
+                .ExecuteUpdateAsync(s => s.SetProperty(m => m.EventId, (Guid?)null));
+            
 
             if (eventToDelete.OrganizerId != organizerId)
                 throw new UnauthorizedAccessException("Only the organizer can delete this event.");

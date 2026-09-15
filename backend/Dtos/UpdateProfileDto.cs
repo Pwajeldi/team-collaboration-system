@@ -32,6 +32,7 @@ namespace backend.Dtos
         public string? Xurl { get; set; }
         public string? FacebookUrl { get; set; }
         public string? ProfilePictureUrl { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class ChangePasswordDto

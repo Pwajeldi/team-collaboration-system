@@ -127,7 +127,7 @@ namespace backend.Services
                 {  
                     Message = m.Content ?? "",
                     SentAt = m.SentAt,
-                    SenderName = $"{m.Sender.FirstName} {m.Sender.LastName}",
+                    SenderName = m.Sender != null ? $"{m.Sender.FirstName} {m.Sender.LastName}" : "Deleted User",
                 })
                 .ToListAsync();
 
@@ -140,7 +140,7 @@ namespace backend.Services
                 {
                     Message = dm.Message,
                     SentAt = dm.SentAt,
-                    SenderName = $"{dm.Sender.FirstName} {dm.Sender.LastName}",
+                    SenderName = dm.Sender != null ? $"{dm.Sender.FirstName} {dm.Sender.LastName}" : "Deleted User",
                 })
                 .ToListAsync();
             var unreadMessageCount = await GetUnreadMessages(user.Id);
@@ -241,7 +241,7 @@ namespace backend.Services
                 {
                     Message = m.Content ?? "",
                     SentAt = m.SentAt,
-                    SenderName = $"{m.Sender.FirstName} {m.Sender.LastName}",
+                    SenderName = m.Sender != null ? $"{m.Sender.FirstName} {m.Sender.LastName}" : "Deleted User",
                 })
                 .ToListAsync();
 
@@ -254,7 +254,7 @@ namespace backend.Services
                 {
                     Message = dm.Message,
                     SentAt = dm.SentAt,
-                    SenderName = $"{dm.Sender.FirstName} {dm.Sender.LastName}",
+                    SenderName = dm.Sender != null ? $"{dm.Sender.FirstName} {dm.Sender.LastName}" : "Deleted User",
                 })
                 .ToListAsync();
             var unreadMessageCount = await GetUnreadMessages(user.Id);

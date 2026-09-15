@@ -175,7 +175,7 @@ namespace backend.Controllers
                 Start = eventEntity.Start,
                 End = eventEntity.End,
                 OrganizerName = $"{firstName} {lastName}" ?? string.Empty,
-                OrganizerId = eventEntity.OrganizerId,
+                OrganizerId = eventEntity.OrganizerId ?? "",
                 Attendees = [.. eventEntity.Attendees.Select(a => new AttendeeResponse
                 {
                     UserId = a.UserId,

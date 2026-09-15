@@ -58,17 +58,7 @@ export const deleteMember = async(id:string) => {
 
 export const createMember = async(payload: CreateMemberDto) => {
     try{
-        const formData = new FormData();
-        formData.append("firstName", payload.firstName);
-        formData.append("lastName", payload.lastName);
-        formData.append("email", payload.email);
-        formData.append("jobTitle", payload.jobTitle);
-        formData.append("departmentId", String(payload.department));
-        formData.append("role", payload.role);
-        if (payload.profilePicture) {
-            formData.append("picture", payload.profilePicture);
-        }
-        const {data} =  await api.post("/team/create", formData);
+        const {data} =  await api.post<string>("/team/create", payload);
         return data;
     }
     catch(error: unknown){

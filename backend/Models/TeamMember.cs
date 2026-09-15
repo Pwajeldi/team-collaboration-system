@@ -10,8 +10,9 @@ namespace backend.Models
         public DateTime DateJoined { get; set; }
         public Department Department { get; set; } = null!;
         public int DepartmentId { get; set; }
-        public string? ProfilePictureUrl { get; set; }
-        public bool IsActive { get; set; } = true;
+        public string? ProfilePictureBlobName { get; set; }
+        public UserProfilePicture? ProfilePicture { get; set; }
+        public bool IsActive { get; set; }
         public RefreshToken? RefreshToken { get; set; }
         public ICollection<Messages> SentMessages { get; set; } = [];
         public ICollection<DepartmentMessage> DepartmentMessagesSent { get; set; } = null!;
@@ -25,7 +26,7 @@ namespace backend.Models
     public class RefreshToken
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string UserId { get; set; } = string.Empty;
+        public string? UserId { get; set; } = string.Empty;
         public TeamMember Member { get; set; } = null!;
         public string Token { get; set; } = string.Empty;
         public DateTime ExpiresAt { get; set; }

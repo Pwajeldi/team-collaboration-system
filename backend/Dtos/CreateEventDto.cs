@@ -30,7 +30,7 @@ namespace backend.Dtos
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public string OrganizerName { get; set; } = string.Empty;
-        public string OrganizerId { get; set; } = string.Empty;
+        public string? OrganizerId { get; set; } = string.Empty;
         public List<AttendeeResponse> Attendees { get; set; } = new();
         public bool IsMeeting { get; set; }
         public Guid? MeetingId { get; set; }

@@ -47,7 +47,7 @@ export const useChatSocket = () => {
                     senderName={message.senderName}
                     content={message.content}
                     onView={() => {
-                        setSelectedUser({ userId: message.senderId, fullName: message.senderName });
+                        setSelectedUser({ userId: message.senderId ?? "", fullName: message.senderName });
                         navigate("/chat");
                     }}
                 />

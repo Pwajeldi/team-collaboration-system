@@ -61,7 +61,7 @@ namespace backend.Services
                     Email = p.Email,
                     DepartmentId = p.DepartmentId,
                     JobTitle = p.JobTitle,
-                    ProfilePictureUrl = p.ProfilePictureUrl,
+                    ProfilePictureUrl = p.ProfilePictureBlobName,
                     FacebookUrl = p.FacebookUrl,
                     GithubUrl = p.GithubUrl,
                     LinkedInUrl = p.LinkedInUrl,
@@ -85,7 +85,7 @@ namespace backend.Services
                         DateJoined = member.DateJoined,
                         JobTitle = member.JobTitle!,
                         UserId = userId,
-                        ProfilePictureUrl = member.ProfilePictureUrl,
+                        ProfilePictureBlobName = member.ProfilePictureBlobName,
                         Role = roles.FirstOrDefault() ?? ""
                     };
                     await _context.UserProfiles.AddAsync(newProfile);
@@ -141,7 +141,7 @@ namespace backend.Services
                 Role = profile.Role,
                 JobTitle = profile.JobTitle,
                 Xurl = profile.Xurl,
-                ProfilePictureUrl = profile.ProfilePictureUrl,
+                ProfilePictureUrl = profile.ProfilePictureBlobName,
             };
             return updatedProfile;
         }

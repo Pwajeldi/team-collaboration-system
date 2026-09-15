@@ -3,10 +3,10 @@
     public class Messages
     {
         public long Id { get; set; }
-        public string SenderId { get; set; } = string.Empty;
-        public string RecipientId { get; set; } = string.Empty;
-        public TeamMember Sender { get; set; } = null!;
-        public TeamMember Recipient { get; set; } = null!;
+        public string? SenderId { get; set; } = string.Empty;
+        public string? RecipientId { get; set; } = string.Empty;
+        public TeamMember? Sender { get; set; } = null!;
+        public TeamMember? Recipient { get; set; } = null!;
         public string? Content { get; set; } = string.Empty;
         public ICollection<MessageAttachment> Attachments { get; set; } = new List<MessageAttachment>();
         public DateTime SentAt { get; set; }

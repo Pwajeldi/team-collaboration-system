@@ -49,7 +49,6 @@ const ChatPage = () => {
                 const uploaded = await uploadAttachment.mutateAsync(pendingFile);
                 attachmentId = uploaded?.id;
             }
-
             await getConnection().invoke("SendDirectMessage", selectedUser?.userId, trimmed, attachmentId ?? null);
             setText("");
             setPendingFile(null);

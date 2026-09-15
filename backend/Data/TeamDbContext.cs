@@ -23,6 +23,7 @@ namespace backend.Data
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<MeetingAttendee> MeetingAttendees { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<UserProfilePicture> UserProfilePictures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -93,7 +94,7 @@ namespace backend.Data
                 .HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<EventAttendee>()
                 .HasOne(ea => ea.Event)
@@ -126,45 +127,52 @@ namespace backend.Data
                 .HasForeignKey(t => t.AssignedById)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<TaskItem>()
-                .HasOne(t => t.AssignedBy)
-                .WithMany()
-                .HasForeignKey(t => t.AssignedById)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.Entity<MessageAttachment>()
                 .HasOne(at => at.Message)
                 .WithMany(m => m.Attachments)
                 .HasForeignKey(at => at.MessageId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<MessageAttachment>()
+                .HasOne(at => at.DepartmentMessage)
+                .WithMany(dm => dm.DepartmentAttachments)
+                .HasForeignKey(m => m.DepartmentMessageId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Meeting>()
                 .HasOne(m => m.Event)
                 .WithOne(e => e.Meeting)
                 .HasForeignKey<Meeting>(m => m.EventId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<MeetingAttendee>()
                 .HasOne(a => a.Meeting)
                 .WithMany(m => m.Attendees)
-                .HasForeignKey(a => a.MeetingId);
+                .HasForeignKey(a => a.MeetingId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<MeetingAttendee>()
-            .HasOne(a => a.User)
-            .WithMany(u => u.MeetingAttendees)
-            .HasForeignKey(a => a.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(a => a.User)
+                .WithMany(u => u.MeetingAttendees)
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Meeting>()
                 .HasOne(m => m.Host)
                 .WithMany(u => u.HostedMeetings)
                 .HasForeignKey(m => m.HostId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<UserProfile>()
                 .HasOne(p => p.TeamMember)
                 .WithOne(m => m.UserProfile)
                 .HasForeignKey<UserProfile>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserProfilePicture>()
+                .HasOne(p => p.User)
+                .WithOne(u => u.ProfilePicture)
+                .HasForeignKey<UserProfilePicture>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

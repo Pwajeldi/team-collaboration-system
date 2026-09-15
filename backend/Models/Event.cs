@@ -8,7 +8,7 @@
         public string? Location { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-        public string OrganizerId { get; set; } = string.Empty; // FK -> User
+        public string? OrganizerId { get; set; } // FK -> User
         public TeamMember Organizer { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool NotificationsSent { get; set; } = false; // background job checkpoint — see below

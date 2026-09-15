@@ -174,9 +174,11 @@
     display: flex;
     padding: 6px;
     border-radius: 6px;
+    transition: 0.2s ease
 }
 
 .chat-attach-btn:hover {
-    background: #f0f0f0;
+    background: #c6a7d8;
     color: #6264a7;
+    transition: 0.2s ease;
 }

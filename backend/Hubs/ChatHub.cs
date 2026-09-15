@@ -231,7 +231,7 @@ namespace backend.Hubs
 
         public async Task SendDepartmentMessage(string message, long? attachmentId)
         {
-            if (string.IsNullOrWhiteSpace(message)) return;
+            if (string.IsNullOrWhiteSpace(message) && !attachmentId.HasValue) return;
             var callerId = Context.UserIdentifier ?? throw new Exception("UserId not found");
             var member = await _userManager.FindByIdAsync(callerId);
             if(member is null) { throw new Exception("User not Found"); }
@@ -261,7 +261,7 @@ namespace backend.Hubs
             await _teamDbContext.SaveChangesAsync();
             if (attachment is not null)
             {
-                attachment.MessageId = newMessage.Id;
+                attachment.DepartmentMessageId = newMessage.Id;
                 await _teamDbContext.SaveChangesAsync();
             }
             var departmentMessageResponse = new DepartmentMessageResponse
