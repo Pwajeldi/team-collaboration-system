@@ -6,12 +6,16 @@ import {useForm} from "@tanstack/react-form"
 import type { ChangePasswordDto } from "../types/types"
 import Loader from "../components/loader"
 import toast from "react-hot-toast"
+import { useState } from "react"
+import { EyeOff, Eye } from "lucide-react"
 
 const ResetPassworPage = () => {
 
     const [searchParams] = useSearchParams();
     const userEmail = searchParams.get("email");
     const resetToken = searchParams.get("token");
+    const [seePassword, setSeePassword] = useState(false);
+    const [seeConfirmPassword, setSeeConfirmPassword] = useState(false);
 
     const resetPasswordSchema = z.object({
         email: z.email(),
@@ -73,22 +77,35 @@ const ResetPassworPage = () => {
                         <label>New Password</label>
                         <form.Field name="newPassword">
                             {(field) => 
-                            <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
+                            <div className="password-wrapper">
+                                <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
                                 id="newPassword"
-                                type="password"
+                                type={seePassword ? "text" : "password"}
                                 placeholder="Enter new password"
-                            />}
+                                />
+                                <button onClick={() => setSeePassword(p => !p)}className="view-password-string">
+                                    {seePassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
+                                </button>
+                            </div>
+                            }
                         </form.Field>
                     </div>
 
                     <div className="form-group">
                         <label>Confirm password</label>
                         <form.Field name="confirmNewPassword">
-                            {(field) => <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
+                            {(field) => 
+                            <div className="password-wrapper">
+                                <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
                                 id="confirmNewPassword"
-                                type="password"
+                                type={seeConfirmPassword ? "text" : "password"}
                                 placeholder="Confirm password"
-                            />} 
+                                />
+                                <button onClick={() => setSeeConfirmPassword(p => !p)}className="view-password-string">
+                                    {seeConfirmPassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
+                                </button>
+                            </div>
+                            } 
                         </form.Field>
                     </div>
 

@@ -4,11 +4,13 @@ import "../styles/loginPage.css"
 import z from "zod"
 import {useForm} from "@tanstack/react-form"
 import type { loginPayload } from "../types/types"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Loader from "../components/loader"
+import { Eye, EyeOff } from "lucide-react"
 
 const LoginPage = () => {
 
+    const [seePassword, setSeePassword] = useState(false);
     const loginSchema = z.object({
         email: z.email(),
         password: z.string().min(4),
@@ -66,7 +68,7 @@ const LoginPage = () => {
                     <div className="form-group">
                         <label>Email</label>
                         <form.Field name="email">
-                            {(field) => 
+                            {(field) =>
                             <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
                                 id="email"
                                 type="email"
@@ -78,11 +80,18 @@ const LoginPage = () => {
                     <div className="form-group">
                         <label>Password</label>
                         <form.Field name="password">
-                            {(field) => <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
+                            {(field) => 
+                            <div className="password-wrapper">
+                                <input value={field.state.value} onChange={(e)=>field.handleChange(e.target.value)}
                                 id="password"
-                                type="password"
+                                type={seePassword ? "text" : "password"}
                                 placeholder="Password"
-                            />} 
+                                />
+                                <button onClick={() => setSeePassword(p => !p)}className="view-password-string">
+                                    {seePassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
+                                </button>
+                            </div>
+                            } 
                         </form.Field>
                     </div>
 
