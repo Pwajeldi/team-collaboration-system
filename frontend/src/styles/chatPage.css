@@ -178,7 +178,7 @@
 }
 
 .chat-attach-btn:hover {
-    background: #c6a7d8;
-    color: #6264a7;
+    background: var(--color-primary-hover);
+    color: white;
     transition: 0.2s ease;
 }

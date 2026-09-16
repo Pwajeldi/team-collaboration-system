@@ -6,11 +6,13 @@ import {
     globalFilteringFeature,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { Pencil, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Search, Trash2 } from "lucide-react";
 import { useGetMembers, useDeleteMember } from "../hooks/memberHook";
 import type { getMemberResponse } from "../types/types";
 import { useFetchDepartments } from "../hooks/departmentHook";
 import { useFetchRoles } from "../hooks/loginHook";
+import Loader from "./loader";
+import DeleteUserModal from "./modals/deleteUserModal";
 
 const features = tableFeatures({
     columnFilteringFeature,
@@ -28,11 +30,13 @@ type AdminUsersTableProps = {
 };
 
 const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
-    const [pagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 1000 });
+    const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 1000 });
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     const [globalFilter, setGlobalFilter] = useState<string>("");
     const [departmentFilter, setDepartmentFilter] = useState<number>();
     const [roleFilter, setRoleFilter] = useState("");
+    const [userToDelete, setUserToDelete] = useState<getMemberResponse>();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const departmentsQuery = useFetchDepartments();
     const rolesQuery = useFetchRoles();
     const query = useGetMembers(pagination.pageIndex, pagination.pageSize, {
@@ -43,8 +47,11 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
     const deleteMember = useDeleteMember();
 
     const handleDelete = async (member: getMemberResponse) => {
-        if (!window.confirm(`Delete ${member.firstName} ${member.lastName}? This can't be undone.`)) return;
-        await deleteMember.mutateAsync(member.memberId);
+        await deleteMember.mutateAsync(member.memberId, {
+            onSuccess:() => {
+                setShowDeleteModal(false)
+            }
+        });
     };
 
     const columns = useMemo(() => columnHelper.columns([
@@ -82,7 +89,10 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
                     <button className="table-contols-btn" onClick={() => onEdit(row.original)} aria-label="Edit">
                         <Pencil size={14} />
                     </button>
-                    <button className="table-contols-btn danger" onClick={() => handleDelete(row.original)} aria-label="Delete">
+                    <button className="table-contols-btn danger" onClick={() => {
+                        setUserToDelete(row.original);
+                        setShowDeleteModal(true);
+                    }} aria-label="Delete">
                         <Trash2 size={14} />
                     </button>
                 </div>
@@ -106,41 +116,58 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
         pageCount: -1,
     }, (state) => state);
 
-    if (query.isLoading) return <div className="loading"></div>;
+     const clearFilters = () => {
+        setGlobalFilter("");
+        setDepartmentFilter(undefined);
+        setRoleFilter("");
+        setPagination(prev => ({
+            ...prev,
+            pageIndex: 0
+        }
+    ));};
+
+    if (query.isLoading) return <div className="loading"><Loader /></div>;
     if (query.isError) return <div className="admin-empty">Couldn't load members.</div>;
 
     return (
     <div>
         <div className="admin-filters">
-                <div className="admin-search">
-                    <Search size={15} />
-                    <input
-                        placeholder="Search by name or email..."
-                        value={globalFilter}
-                        onChange={(e) => setGlobalFilter(e.target.value)}
-                    />
-                </div>
-                <select 
-                    value={departmentFilter ?? ""} 
-                    onChange={(e) => {
-                        const value = e.target.value;
-                        setDepartmentFilter(value === "" ? undefined : Number(value))
-                    }}
-                    >
-                    {departmentsQuery.isLoading ? "Loading departments…" : "All Departments"}
-                    {departmentsQuery.data?.map((d) => (
-                        <option key={d.departmentId} value={d.departmentId}>{d.departmentName}</option>
-                    ))}
-                </select>
-                <select 
-                    value={roleFilter} 
-                    onChange={(e) => setRoleFilter(e.target.value)}>
-                    <option value="">All roles</option>
-                    {rolesQuery.data?.map((r) => (
-                        <option key={r.id} value={r.name}>{r.name}</option>
-                    ))}
-                </select>
+            <div className="admin-search">
+                <Search size={15} />
+                <input
+                    placeholder="Search by name or email..."
+                    value={globalFilter}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                />
             </div>
+            <select 
+                value={departmentFilter ?? ""} 
+                onChange={(e) => {
+                    const value = e.target.value;
+                    setDepartmentFilter(value === "" ? undefined : Number(value))
+                }}
+                >
+                {departmentsQuery.isLoading ? "Loading departments…" : "All Departments"}
+                {departmentsQuery.data?.map((d) => (
+                    <option key={d.departmentId} value={d.departmentId}>{d.departmentName}</option>
+                ))}
+            </select>
+            <select 
+                value={roleFilter} 
+                onChange={(e) => setRoleFilter(e.target.value)}>
+                <option value="">All roles</option>
+                {rolesQuery.data?.map((r) => (
+                    <option key={r.id} value={r.name}>{r.name}</option>
+                ))}
+            </select>
+            <button
+                className="clear-filters-btn"
+                onClick={clearFilters}
+                disabled={!globalFilter && departmentFilter === undefined}
+            >
+                Clear Filters
+            </button>
+        </div>
         <div className="table-container">
             <table>
                 <thead>
@@ -166,7 +193,15 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
                     ))}
                 </tbody>
             </table>
+            <div className="table-controls">
+                <button className="table-contols-btn" onClick={()=>table.firstPage()} disabled={!table.getCanPreviousPage()}>{<ChevronsLeft/>}</button>
+                <button className="table-contols-btn" onClick={()=>table.previousPage()} disabled={!table.getCanPreviousPage()}>{<ChevronLeft/>}</button>
+                <span>Page {table.state.pagination.pageIndex+1} of {table.getPageCount()}</span>
+                <button className="table-contols-btn" onClick={()=>table.nextPage()} disabled={!table.getCanNextPage()}>{<ChevronRight/>}</button>
+                <button className="table-contols-btn" onClick={()=>table.lastPage()} disabled={!table.getCanNextPage()}>{<ChevronsRight/>}</button>
+            </div>
         </div>
+        {showDeleteModal && <DeleteUserModal userName={`${userToDelete?.firstName} ${userToDelete?.lastName}`} handleDelete={() => handleDelete(userToDelete!)} onClose={() => setShowDeleteModal(false)}/>}
     </div>
     );
 };

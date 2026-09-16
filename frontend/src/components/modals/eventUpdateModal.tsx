@@ -76,7 +76,9 @@ const UpdateEventModal = ({ event, onClose}: EventFormModalProps) => {
                 title: value.title,
                 isMeeting: value.isMeeting,
             };
-            const updated = await updateEvent.mutateAsync(payload);
+            const updated = await updateEvent.mutateAsync(payload, {
+                onSuccess:() => {onClose()}
+            });
             const conflicted = updated.attendees.filter((a) => a.hadOverlapAtCreation);
             if (conflicted.length > 0) {
                 toast(
@@ -84,10 +86,10 @@ const UpdateEventModal = ({ event, onClose}: EventFormModalProps) => {
                     { icon: "⚠️" }
                 );
             }
-
-            onClose();
         },
     });
+
+
 
     const filteredAttendees = useMemo(() => {
         const list = usersQuery.data ?? [];
@@ -95,6 +97,10 @@ const UpdateEventModal = ({ event, onClose}: EventFormModalProps) => {
         const search = attendeeSearch.toLowerCase();
         return list.filter((u) => u.fullName.toLowerCase().includes(search) || u.email.toLowerCase().includes(search));
     }, [usersQuery.data, attendeeSearch]);
+
+    if(updateEvent.isSuccess){
+        onClose();
+    }
 
     return (
         <div className="event-modal-overlay" onClick={onClose}>

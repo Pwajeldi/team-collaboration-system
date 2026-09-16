@@ -12,7 +12,7 @@ namespace backend.Models
         public int DepartmentId { get; set; }
         public string? ProfilePictureBlobName { get; set; }
         public UserProfilePicture? ProfilePicture { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
         public RefreshToken? RefreshToken { get; set; }
         public ICollection<Messages> SentMessages { get; set; } = [];
         public ICollection<DepartmentMessage> DepartmentMessagesSent { get; set; } = null!;

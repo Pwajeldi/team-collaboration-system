@@ -91,17 +91,18 @@ namespace backend.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpPost("create")]
-        [Consumes("multipart/form-data")]
         public async Task<IActionResult> NewMember(CreateMemberDto dto)
         {
-            var dept = await _context.Departments.FindAsync(dto.DepartmentId);
-            if(dept is null) { return BadRequest("Invalid department"); }
             try
             {
                 await _service.CreateNewMember(dto);
                 return Created();
             }
             catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
             {
                 return BadRequest(ex.Message);
             }

@@ -78,6 +78,7 @@ namespace backend.Controllers
                 .Include(m => m.Sender)
                 .Include(m => m.DepartmentAttachments)
                 .Where(dm => dm.DepartmentId == user.DepartmentId)
+                .AsNoTracking()
                 .AsQueryable();
 
             if (encodedCursor is not null)

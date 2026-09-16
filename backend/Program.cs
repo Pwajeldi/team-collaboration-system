@@ -95,7 +95,7 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     );
 });
 
-builder.Services.AddSingleton<IFileStorageService, CloudflareR2StorageService>();
+builder.Services.AddSingleton<IFileStorageService, FileStorageService>();
 
 builder.Services.Configure<MailCreds>(builder.Configuration.GetSection("Email"));
 builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Frontend"));

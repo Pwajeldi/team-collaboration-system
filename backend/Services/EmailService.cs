@@ -44,7 +44,7 @@ namespace backend.Services
                     $"Hi {recipientName},\n\n" +
                     "Your account has been created!.\n"+
                     "Click the link below to complete your account setup:\n\n" +
-                    $"{signUpUrl}\n\n" +
+                    $"{resetUrl}\n\n" +
                     "Welcome aboard!"
             );
 

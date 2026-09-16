@@ -4,7 +4,8 @@
     {
         public int Id { get; set; }
         public string DepartmentName { get; set; } = string.Empty;
-        public string ManagerId { get; set; } = string.Empty;
+        public string? ManagerId { get; set; }
+        public TeamMember? DepartmentManager { get; set; }
         public ICollection<TeamMember> Members { get; set; } = [];
         public ICollection<DepartmentMessage> Messages { get; set; } = [];
     }

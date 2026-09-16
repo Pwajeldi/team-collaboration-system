@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(TeamDbContext))]
-    [Migration("20260915134630_FK_Fixes")]
-    partial class FK_Fixes
+    [Migration("20260915171549_Fix Manager delete")]
+    partial class FixManagerdelete
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -171,13 +171,17 @@ namespace backend.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ManagerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ManagerId1")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentName")
                         .IsUnique();
+
+                    b.HasIndex("ManagerId1");
 
                     b.ToTable("Departments");
                 });
@@ -791,6 +795,15 @@ namespace backend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("backend.Models.Department", b =>
+                {
+                    b.HasOne("backend.Models.TeamMember", "Manager")
+                        .WithMany()
+                        .HasForeignKey("ManagerId1");
+
+                    b.Navigation("Manager");
                 });
 
             modelBuilder.Entity("backend.Models.DepartmentMessage", b =>

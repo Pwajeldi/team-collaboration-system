@@ -36,6 +36,7 @@ export const useDeleteMember = () => {
         mutationFn: deleteMember,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['members'] });
+            toast.success("Removed user from system")
         },
         onError: (error) => toast.error(`${error.message}`),
     })

@@ -45,8 +45,11 @@ const EditMemberModal = ({ member, onClose, onSuccess }: EditMemberModalProps) =
                     departmentId: value.department,
                     role: value.role,
                 },
+            }, {
+                onSuccess:() => {
+                    onSuccess();
+                }
             });
-            onSuccess();
         },
     });
 

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace backend.Controllers
 {
@@ -42,6 +41,10 @@ namespace backend.Controllers
                 return Unauthorized(ex.Message);
             }
             catch (KeyNotFoundException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
             {
                 return Unauthorized(ex.Message);
             }

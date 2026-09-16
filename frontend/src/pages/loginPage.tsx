@@ -46,22 +46,17 @@ const LoginPage = () => {
         }
     }, [login.isSuccess]);
 
-    if(login.isError){
-        console.error(login.error);
-    }
-
     return(
     <>
         <main className="login-page">
             <section className="login-card">
                 <header className="login-header">
-                   {/* <img src="logo.svg" alt="Company Logo" /> */} 
                     <h2>Team Sync</h2>
                     <p>Sign in to continue</p>
                 </header>
 
                 {login.isError && (
-                    <div className="login-error">Incorrect email or password. Please try again.</div>
+                    <div className="login-error">{login.error.message.slice(0,5)}</div>
                 )}
                 <form onSubmit={(e) => {
                     e.preventDefault();

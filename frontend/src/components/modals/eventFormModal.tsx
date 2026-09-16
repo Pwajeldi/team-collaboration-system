@@ -6,12 +6,12 @@ import toast from "react-hot-toast";
 import { useCreateEvent } from "../../hooks/calendarHook";
 import "../../styles/eventFormModal.css";
 import { useGetUsers } from "../../hooks/memberHook";
+import Loader from "../loader";
 
 type EventFormModalProps = {
     initialStart?: string;
     initialEnd?: string;
     onClose: () => void;
-    onSuccess: () => void;
 };
 
 const eventSchema = z.object({
@@ -23,7 +23,7 @@ const eventSchema = z.object({
     attendeeIds: z.array(z.string()),
     isMeeting: z.boolean(),
 }).refine((data) => new Date(data.end) > new Date(data.start), {
-    message: "End time must be after start time",
+    message: "End time must be greater than start time",
     path: ["end"],
 });
 
@@ -35,7 +35,7 @@ const toLocalInputValue = (iso?: string) => {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventFormModalProps) => {
+const EventFormModal = ({ initialStart, initialEnd, onClose}: EventFormModalProps) => {
     const usersQuery = useGetUsers();
     const createEvent = useCreateEvent();
     const [attendeeSearch, setAttendeeSearch] = useState("");
@@ -62,7 +62,14 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                 isMeeting: value.isMeeting,
             };
 
-            const created = await createEvent.mutateAsync(payload);
+            const created = await createEvent.mutateAsync(payload, {
+                onSuccess: () => {
+                    onClose();
+                },
+                onError: () => {
+                    toast.error("Unable to perform this action");
+                },
+            });
 
             const conflicted = created.attendees.filter((a) => a.hadOverlapAtCreation);
             if (conflicted.length > 0) {
@@ -71,8 +78,6 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                     { icon: "⚠️" }
                 );
             }
-
-            onSuccess();
         },
     });
 
@@ -84,7 +89,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
     }, [usersQuery.data, attendeeSearch]);
 
     return (
-        <div className="event-modal-overlay" onClick={onClose}>
+        <div className="event-modal-overlay" onClick={(e) => e.stopPropagation()}>
             <div className="event-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="event-modal-header">
                     <h3>Create Event</h3>
@@ -95,7 +100,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
 
                 <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}>
                     <div className="event-form-group">
-                        <label htmlFor="title">Title</label>
+                        <label htmlFor="title">Title*</label>
                         <form.Field name="title">
                             {(field) => (
                                 <>
@@ -114,7 +119,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                     </div>
 
                     <div className="event-form-group">
-                        <label htmlFor="description">Description</label>
+                        <label htmlFor="description">Description**</label>
                         <form.Field name="description">
                             {(field) => (
                                 <textarea
@@ -129,7 +134,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                     </div>
 
                     <div className="event-form-group">
-                        <label htmlFor="location">Location</label>
+                        <label htmlFor="location">Location*</label>
                         <form.Field name="location">
                             {(field) => (
                                 <input
@@ -144,7 +149,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
 
                     <div className="event-form-row">
                         <div className="event-form-group">
-                            <label htmlFor="start">Start</label>
+                            <label htmlFor="start">Start*</label>
                             <form.Field name="start">
                                 {(field) => (
                                     <>
@@ -162,7 +167,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                             </form.Field>
                         </div>
                         <div className="event-form-group">
-                            <label htmlFor="end">End</label>
+                            <label htmlFor="end">End*</label>
                             <form.Field name="end">
                                 {(field) => (
                                     <>
@@ -237,7 +242,7 @@ const EventFormModal = ({ initialStart, initialEnd, onClose, onSuccess }: EventF
                                         </div>
 
                                         <div className="attendee-list">
-                                            {usersQuery.isLoading && <p className="attendee-empty">Loading…</p>}
+                                            {usersQuery.isLoading && <p className="attendee-empty"><Loader size="sm" fullHeight={false}/></p>}
                                             {!usersQuery.isLoading && filteredAttendees.length === 0 && (
                                                 <p className="attendee-empty">No matches.</p>
                                             )}

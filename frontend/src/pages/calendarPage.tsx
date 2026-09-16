@@ -175,7 +175,6 @@ const Calendar = () => {
                     initialStart={modalRange.start}
                     initialEnd={modalRange.end}
                     onClose={() => setModalOpen(false)}
-                    onSuccess={() => setModalOpen(false)}
                 />
             )}
 

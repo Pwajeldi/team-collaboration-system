@@ -6,6 +6,7 @@ import { useFetchDepartments } from "../../hooks/departmentHook"
 import type { CreateMemberDto } from "../../types/types"
 import "../../styles/newUserForm.css"
 import { useFetchRoles } from "../../hooks/loginHook"
+import Loader from "../loader"
 
 type ShowUserFormProps = {
     onSuccess: () => void
@@ -22,7 +23,7 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
         lastName: z.string().min(2),
         email: z.email(),
         jobTitle: z.string(),
-        department: z.number().int().positive(),
+        department: z.int().positive("Select a department"),
         role: z.string(),
     })
 
@@ -43,17 +44,15 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
 
     const HandleSubmit = async (payload: CreateMemberDto) => {
         if (!payload) return;
-        try {
-            await createUser.mutateAsync(payload);
-            onSuccess();
-        }
-        catch (err) {
-            console.error(err)
-        }
+        await createUser.mutateAsync(payload,{
+            onSuccess() {
+                onSuccess();
+            },
+        });
     }
 
     return (
-        <div className="new-user-overlay" onClick={onClose}>
+        <div className="new-user-overlay" onClick={(e) => e.stopPropagation()}>
             <div className="new-user-container" onClick={(e) => e.stopPropagation()}>
                 <div className="new-user-header">
                     <h3>Create User</h3>
@@ -142,8 +141,8 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
                                         onChange={(e) => field.handleChange(Number(e.target.value))}
                                         disabled={departmentsQuery.isLoading}
                                     >
-                                        <option value="" disabled>
-                                            {departmentsQuery.isLoading ? "Loading departments…" : "Select a department"}
+                                        <option value={0} >
+                                            {departmentsQuery.isLoading ? <Loader size="sm" fullHeight={false}/> : "Select a department"}
                                         </option>
                                         {departmentsQuery.data?.map((dept) => (
                                             <option key={dept.departmentId} value={dept.departmentId}>
@@ -180,7 +179,8 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
                                     {field.state.meta.errors.length > 0 && (
                                         <span className="field-error">{field.state.meta.errors[0]?.message}</span>
                                     )}
-                                </>}
+                                </>
+                            }
                         </form.Field>
                     </div>
 

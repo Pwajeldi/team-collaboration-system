@@ -31,7 +31,7 @@ namespace backend.Dtos
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? JobTitle { get; set; }
-        [Required] public int DepartmentId { get; set; }
+        [Required] public int Department { get; set; }
         public string? Role { get; set; }
     }
 

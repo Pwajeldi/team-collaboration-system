@@ -77,8 +77,6 @@ const MembersPage = () => {
         debugTable: true
     }, (state) => state
     )
-    console.log(query.data?.items)
-    console.log(table.getPageCount())
 
     useTanStackTableDevtools(table)
     if(query.isLoading)return(<Loader />);

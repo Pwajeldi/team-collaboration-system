@@ -42,8 +42,7 @@ namespace backend.Controllers
         public async Task<IActionResult> GetEvents()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user is null)
-                return Unauthorized("null_user");
+            if (user is null) return Unauthorized("null_user");
             try
             {
                 var myEvents = await _calendar.GetEvents(user);

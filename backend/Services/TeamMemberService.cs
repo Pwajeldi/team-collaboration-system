@@ -54,31 +54,33 @@ namespace backend.Services
                 LastName = dto.LastName,
                 JobTitle = dto.JobTitle,
                 DateJoined = DateTime.UtcNow,
-                DepartmentId = dto.DepartmentId,
+                DepartmentId = dto.Department,
                 IsActive = true,
             };
-
-            var creatingManager = string.Equals(Roles.Manager, dto.Role, StringComparison.OrdinalIgnoreCase);
-            var department = await _context.Departments.FirstOrDefaultAsync(d => d.Id == dto.DepartmentId);
-            var currentManagerId = department!.ManagerId;
                 
             try
             {
+                var creatingManager = string.Equals(Roles.Manager, dto.Role, StringComparison.OrdinalIgnoreCase);
+                var department = await _context.Departments
+                   .FirstOrDefaultAsync(d => d.Id == dto.Department) ?? throw new KeyNotFoundException("Department does not exist");
+
+                if (creatingManager)
+                {
+                    if (!string.IsNullOrEmpty(department.ManagerId))
+                    {
+                        throw new InvalidOperationException("Manager already exists for the specified department");
+                    }
+                    else
+                    {
+                        department.ManagerId = teamMember.Id;
+                    }
+                }
+
                 var result = await _userManager.CreateAsync(teamMember);
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(teamMember, dto.Role ?? Roles.Regular);
-                    if (creatingManager)
-                    {
-                        if (currentManagerId != null)
-                        {
-                            throw new InvalidOperationException("Manager already exists for the specified department");
-                        }
-                        else
-                        {
-                            department.ManagerId = teamMember.Id;
-                        }
-                    }
+            
                     await _context.SaveChangesAsync();
 
                     var userProfile = new UserProfile
@@ -112,10 +114,15 @@ namespace backend.Services
                     });
                 }       
             }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, "Error creating team member. {Error}, dto.deptId: {dtoDept}", ex.Message, dto.Department);
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating team member.");
-                throw new Exception("An error occurred while creating the team member.");
+                throw;
             }
 
         }
@@ -148,6 +155,11 @@ namespace backend.Services
                 await _context.Events
                     .Where(e => e.OrganizerId == member.Id)
                     .ExecuteUpdateAsync(e => e.SetProperty(e => e.OrganizerId, (string?)null));
+
+                await _context.Departments
+                    .Where(d => d.ManagerId == member.Id)
+                    .ExecuteUpdateAsync(e => e.SetProperty(e => e.ManagerId, (string?)null));
+
 
                 var result = await _userManager.DeleteAsync(member);
                 if (result.Succeeded)

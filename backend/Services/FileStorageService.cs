@@ -9,12 +9,12 @@ namespace backend.Services
         Task<Stream> DownloadAsync(string key);
         Task DeleteAsync(string key);
     }
-    public class CloudflareR2StorageService : IFileStorageService
+    public class FileStorageService : IFileStorageService
     {
         private readonly IAmazonS3 _s3Client;
         private readonly string _bucketName;
 
-        public CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration config)
+        public FileStorageService(IAmazonS3 s3Client, IConfiguration config)
         {
             _s3Client = s3Client;
             _bucketName = config["CloudflareR2:BucketName"]

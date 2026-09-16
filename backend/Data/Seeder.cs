@@ -49,7 +49,8 @@ namespace backend.Data
                     LastName = "Admin",
                     DateJoined = DateTime.UtcNow,
                     JobTitle = "Administrator",
-                    DepartmentId = itDepartment.Id
+                    DepartmentId = itDepartment.Id,
+                    IsActive = true,
                 };
 
                 var result = await userManager.CreateAsync(admin, "Admin123!");
