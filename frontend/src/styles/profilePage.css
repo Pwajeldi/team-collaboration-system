@@ -1,58 +1,84 @@
+/* profilePage.css */
 .profile-page{
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
     display: grid;
     grid-template-columns: 300px 1fr;
     grid-template-rows: auto auto auto;
     grid-template-areas:
      "profile-page-title profile-page-title"
      "profile-overview personal-info"
-     "account-status personal-security"
+     "social-links personal-security"
     ;
     padding: 1rem;
     gap: 20px;
-    overflow-y: auto;
 }
 
-.profile-page-title > h1{
-    grid-area: page-title;
+.profile-page-title{
+    grid-area: profile-page-title;
 }
 
 .profile-overview{
     grid-area: profile-overview;
     background: var(--color-surface);
     height: 400px;
-    overflow: hidden; 
+    overflow: hidden;
     display: flex;
     align-items: center;
     gap: 20px;
-    border-radius: 12px;
     flex-direction: column;
     padding: 15px;
     border-radius: 20px;
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 16px, rgba(0, 0, 0, 0.04) 0px 0px 0px 1px;
+    box-shadow: var(--shadow);
 }
 
 .personal-info{
     grid-area: personal-info;
     flex-direction: column;
-    background: var(--color-surface); 
+    background: var(--color-surface);
     min-height: 0;
-    overflow: hidden; 
+    overflow: auto;
     display: flex;
     gap: 20px;
     border-radius: 20px;
     padding: 15px;
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 16px, rgba(0, 0, 0, 0.04) 0px 0px 0px 1px;
+    box-shadow: var(--shadow);
 }
 
-.account-status{
-    grid-area: account-status;
+.social-links{
+    grid-area: social-links;
     display: flex;
     flex-direction: column;
-
     background: var(--color-surface);
     padding: 15px;
     border-radius: 20px;
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 16px, rgba(0, 0, 0, 0.04) 0px 0px 0px 1px;
+    box-shadow: var(--shadow);
+}
+
+.social-links-header{
+    margin-left: 12px;
+    margin-bottom: 12px;
+}
+
+.social-links-header h3{
+    font-size: 15px;
+    font-weight: 700;
+    color: rgb(26, 27, 46);
+    margin: 0;
+}
+
+.social-links-group{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0 12px;
+}
+
+.social-links-group .profile-input label{
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .personal-security{
@@ -63,7 +89,7 @@
     background: var(--color-surface);
     padding: 15px;
     border-radius: 20px;
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 16px, rgba(0, 0, 0, 0.04) 0px 0px 0px 1px;
+    box-shadow: var(--shadow);
 }
 
 .personal-security-password{
@@ -73,7 +99,6 @@
     justify-content: space-between;
     gap:3px;
     width: 100%;
-    justify-content: space-between;
     margin-bottom: 12px;
 }
 
@@ -152,6 +177,10 @@
     align-items: flex-start;
 }
 
+.profile-input-full{
+    grid-column: 1 / -1;
+}
+
 .profile-initial{
     position: relative;
     display: flex;
@@ -163,13 +192,20 @@
     position: relative;
     height: 130px;
     width: 130px;
-    border-radius: 50%;  
+    border-radius: 50%;
     background-color: var(--color-background);
     display: flex;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
 }
 
+.profile-picture img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
 
 .profile-initial span{
     font-size: 45px;
@@ -181,8 +217,8 @@
     border-radius: 50%;
     bottom: 0px;
     right: 10px;
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     background: var(--color-primary);
     color: white;
     border: 2px solid white;
@@ -261,18 +297,7 @@
     letter-spacing: 0.04em;
 }
 
-.profile-input input{
-    font-size: 13px;
-    outline: none;
-    border: 1px solid rgb(232, 232, 239);
-    border-radius: 10px;
-    padding: 10px 14px;
-    background: rgb(250, 250, 250);
-    width: 100%;
-    box-sizing: border-box;
-    color: rgb(55, 65, 81);
-}
-
+.profile-input input,
 .profile-input textarea{
     font-size: 13px;
     outline: none;
@@ -285,7 +310,13 @@
     color: rgb(55, 65, 81);
 }
 
-.profile-input input,textarea:focus{
+.profile-input input:disabled{
+    color: rgb(156, 163, 175);
+    cursor: not-allowed;
+}
+
+.profile-input input:focus,
+.profile-input textarea:focus{
     border: 1px solid var(--color-primary);
 }
 

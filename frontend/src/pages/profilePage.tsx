@@ -1,17 +1,23 @@
-import { /*useEffect*/ useState } from "react";
+// profilePage.tsx
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import Loader from "../components/loader";
-import { useGetMyProfile, useResetPassword, useUpdateMyProfile } from "../hooks/profileHook"
+import { useGetMyProfile, useResetPassword, useUpdateMyProfile, useUploadProfilePicture } from "../hooks/profileHook"
+import { useFetchDepartments } from "../hooks/departmentHook"
 import "../styles/profilePage.css"
 import { getInitials } from "../services/getInitials";
 import type { PasswordResetDto, UpdateProfileDto } from "../types/types";
 import toast from "react-hot-toast";
 import { Eye, EyeOffIcon, Pencil } from "lucide-react";
+import ImageUploadModal from "../components/modals/imageUploadModal";
+import {SiGithub, SiFacebook, SiX, SiLinkerd,} from "react-icons/si"
 
 const dateOptions: Intl.DateTimeFormatOptions = {
-    month: "short",
+    month: "long",
     year: "numeric",
     day: "numeric"
 }
+
+
 
 const MyProfile = () => {
     const profileQuery = useGetMyProfile();
@@ -19,80 +25,125 @@ const MyProfile = () => {
     const dateJoined = new Date(data?.dateJoined ?? '').toLocaleDateString("en-US", dateOptions);
     const updateProfile = useUpdateMyProfile();
     const resetPassword = useResetPassword();
+    const departmentsQuery = useFetchDepartments();
     const firstName = data?.firstName;
     const lastName = data?.lastName;
     const myEmail = data?.email;
-    const jobTitle = data?.jobTitle;
+    const [jobTitle] = useState(data?.jobTitle);
     const [bio, setBio] = useState(data?.bio);
-    const [dob, setDob] = useState(data?.dateOfBirth);
-    const [linkedinUrl, /*setLinkedinUrl*/] = useState(data?.linkedInUrl);
-    const [githubUrl, /*setGithubUrl*/] = useState(data?.githubUrl);
-    const [xUrl, /*setXUrl*/] = useState(data?.xurl);
-    const [facebookUrl, /*setFacebookUrl*/] = useState(data?.facebookUrl);
+    const [dob, setDob] = useState(data?.dateOfBirth ?? "");
+    const [linkedinUrl, setLinkedinUrl] = useState(data?.linkedInUrl);
+    const [githubUrl, setGithubUrl] = useState(data?.githubUrl);
+    const [xUrl, setXUrl] = useState(data?.xurl);
+    const [facebookUrl, setFacebookUrl] = useState(data?.facebookUrl);
     const [phoneNumber, setPhoneNumber] = useState(data?.phoneNumber);
-    const [profilePicture, /*setProfilePicture*/] = useState(data?.profilePictureUrl);
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmNewPassword, setConfirmNewPassword] = useState("");
     const role = data?.role;
     const [canSeePassword, setCanSeePassword] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const uploadPicture = useUploadProfilePicture();
+    const [viewImageModal, setViewImageModal] = useState(false);
+
+    const departmentName = departmentsQuery.data?.find(
+        (d) => d.departmentId === data?.departmentId
+    )?.departmentName ?? "—";
 
     const profilePayload: UpdateProfileDto = {
-        bio: bio,
+        bio,
         dateOfBirth: dob,
-        facebookUrl: facebookUrl,
-        githubUrl: githubUrl,
+        facebookUrl,
+        githubUrl,
         linkedInUrl: linkedinUrl,
-        phoneNumber: phoneNumber,
-        profilePictureUrl: profilePicture,
-        xurl: xUrl
+        phoneNumber,
+        xurl: xUrl,
     };
 
-    const resetPasswordPayload: PasswordResetDto = {
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        confirmNewPassword: confirmNewPassword,
-    } 
+    useEffect(() => {
+        setPhoneNumber(data?.phoneNumber);
+        setDob(data?.dateOfBirth ?? "");
+        setBio(data?.bio);
+        setFacebookUrl(data?.facebookUrl);
+        setXUrl(data?.xurl)
+        setGithubUrl(data?.githubUrl);
+        setLinkedinUrl(data?.linkedInUrl)
+    }, 
+    [data?.phoneNumber, data?.dateOfBirth, data?.bio, 
+        data?.facebookUrl, data?.xurl, data?.githubUrl, data?.linkedInUrl
+    ]
+    )
+    console.log(dob)
 
     const handleUpdateProfile = async () => {
-        if(profilePayload){
-            updateProfile.mutateAsync(profilePayload);
+        await updateProfile.mutateAsync(profilePayload);
+    }
+
+    const handleImageUpload = async () => {
+        setViewImageModal(false);
+        if (!selectedImage) return;
+        await uploadPicture.mutateAsync(selectedImage);
+    }
+
+    const handlePasswordReset = async () => {
+        if (newPassword !== confirmNewPassword) {
+            toast.error("Password inputs do not match");
+            return;
+        }
+
+        const payload: PasswordResetDto = { oldPassword, newPassword, confirmNewPassword };
+
+        try {
+            await resetPassword.mutateAsync(payload);
+            setOldPassword("");
+            setNewPassword("");
+            setConfirmNewPassword("");
+        } catch (err) {
+            console.error("Failed to reset password:", err);
         }
     }
 
-    const handlePasswordReset = () => {
-        if(resetPasswordPayload){
-            if(newPassword !== confirmNewPassword){
-                toast.error("Password inputs do not match");
-            }
-            resetPassword.mutateAsync(resetPasswordPayload);
-            if (resetPassword.isSuccess){
-                setOldPassword("");
-                setNewPassword("");
-                setConfirmNewPassword("");
-            }
-        }
+    const toggleViewPassword = () => setCanSeePassword(prev => !prev);
+
+    const handlePictureSelect = (e: ChangeEvent<HTMLInputElement>) => {
+        const image = e.target.files?.[0];
+        if (!image) return;
+        const url = URL.createObjectURL(image);
+
+        setSelectedImage(image);
+        setPreviewUrl(url);
+        setViewImageModal(true);
     }
 
-    const toggleViewPassword = () => {
-        setCanSeePassword(prev => !prev);
-    };
+    if (profileQuery.isLoading) return <Loader/>;
 
-
-    if(profileQuery.isLoading){ return <Loader/>}
     return(
         <div className="profile-page">
             <div className="profile-page-title">
                 <h1>Profile & Settings</h1>
             </div>
-            
+
             <div className="profile-overview">
                 <div className="profile-initial">
                     <div className="profile-picture">
-                        <span>{getInitials(`${firstName} ${lastName}`)}</span>
+                        {uploadPicture.isPending && previewUrl
+                            ? <img src={previewUrl} alt="Profile picture" />
+                            : data?.profilePictureUrl
+                                ? (
+                                    <img
+                                        src={data.profilePictureUrl}
+                                        alt="Profile picture"
+                                        onError={() => console.error("Failed to load profile picture:", data.profilePictureUrl)}
+                                    />
+                                )
+                                : <span>{getInitials(`${firstName} ${lastName}`)}</span>
+                        }
                     </div>
-                    <button onClick={() => {toast.error("to be implemented")}}>
-                        {<Pencil size={13}/>}
+                    <input type="file" accept="image/*" ref={fileInputRef} hidden onChange={handlePictureSelect}/>
+                    <button onClick={() => fileInputRef.current?.click()} aria-label="Change profile picture">
+                        <Pencil size={13}/>
                     </button>
                 </div>
                 <div className="profile-overview-minidetail">
@@ -103,31 +154,16 @@ const MyProfile = () => {
 
                 <div className="profile-overview-details">
                     <div className="detail">
-                        <span>department</span>
-                        <p>dept</p>
+                        <span>Department</span>
+                        <p>{departmentName}</p>
                     </div>
                     <div className="detail">
-                        <span>email</span>
+                        <span>Email</span>
                         <p>{myEmail}</p>
                     </div>
                     <div className="detail">
-                        <span>joined</span>
+                        <span>Joined</span>
                         <p>{dateJoined}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="account-status">
-                <div className="account-status-header">
-                    <h3>Account Status</h3>
-                    <span>Status</span>
-                </div>
-                <div className="account-status-group">
-                    <div className="status-info">
-                        <span>Last Login</span> <p>Value</p>
-                    </div>
-                    <div className="status-info">
-                        <span>Account Type</span> <p>Value</p>
                     </div>
                 </div>
             </div>
@@ -135,8 +171,7 @@ const MyProfile = () => {
             <div className="personal-info">
                 <div className="personal-info-header">
                     <h3>Personal Information</h3>
-                    <button onClick={handleUpdateProfile}
-                    className="update-profile-btn">
+                    <button onClick={handleUpdateProfile} className="update-profile-btn">
                         {updateProfile.isPending ? <Loader size="sm" fullHeight={false}/> : <span>Update profile</span>}
                     </button>
                 </div>
@@ -144,43 +179,61 @@ const MyProfile = () => {
                 <div className="personal-info-input-group">
                     <div className="profile-input">
                         <label>First Name</label>
-                        <input type="text" value={firstName} disabled={true}/>
+                        <input type="text" value={data?.firstName} disabled/>
                     </div>
                     <div className="profile-input">
                         <label>Last Name</label>
-                        <input type="text" value={lastName} disabled={true}/>
+                        <input type="text" value={data?.lastName} disabled/>
                     </div>
                     <div className="profile-input">
                         <label>Email Address</label>
-                        <input type="text" value={myEmail} disabled={true}/>
+                        <input type="text" value={data?.email} disabled/>
                     </div>
                     <div className="profile-input">
                         <label>Phone Number</label>
-                        <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}/>
+                        <input type="tel" value={phoneNumber ?? ""} onChange={(e) => setPhoneNumber(e.target.value)}/>
                     </div>
                     <div className="profile-input">
-                        <input type="text" value={jobTitle}/>
+                        <label>Job Title</label>
+                        <input type="text" value={data?.jobTitle} disabled/>
                     </div>
                     <div className="profile-input">
                         <label>Department</label>
-                        <select disabled={true}/>
+                        <input type="text" value={departmentName} disabled/>
                     </div>
                     <div className="profile-input">
-                        <label>Joined</label>
-                        <input className="profile-input" type="" value={dob} onChange={(e) => setDob(e.target.value)}/>
-                    </div>          
-                    {/*<div className="profile-input"><input type="text" value={location}/></div>*/}
-                    <div className="profile-input">
+                        <label>Date of Birth</label>
+                        <input type="date" value={dob.split("T")[0] ?? ""} onChange={(e) => setDob(e.target.value)}/>
+                    </div>
+                    <div className="profile-input profile-input-full">
                         <label>Bio</label>
-                        <textarea value={bio} onChange={(e) => setBio(e.target.value)}/>
+                        <textarea value={bio ?? ""} onChange={(e) => setBio(e.target.value)}/>
                     </div>
                 </div>
+            </div>
 
-                {// This is to go in a modal
-                /*<input className="profile-input" type="url" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)}/>
-                <input className="profile-input" type="url" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)}/>
-                <input className="profile-input" type="url" value={xUrl} onChange={(e) => setXUrl(e.target.value)}/>
-                <input className="profile-input" type="url" value={facebookUrl} onChange={(e) => setFacebookUrl(e.target.value)}/>*/}
+            <div className="social-links">
+                <div className="social-links-header">
+                    <h3>Social Links</h3>
+                </div>
+                <div className="social-links-group">
+                    <div className="profile-input">
+                        <label><SiLinkerd/> LinkedIn</label>
+                        <input type="url" placeholder="https://linkedin.com/in/…" value={linkedinUrl ?? ""} onChange={(e) => setLinkedinUrl(e.target.value)}/>
+                    </div>
+                    <div className="profile-input">
+                        <label><SiGithub /> GitHub</label>
+                        <input type="url" placeholder="https://github.com/…" value={githubUrl ?? ""} onChange={(e) => setGithubUrl(e.target.value)}/>
+                    </div>
+                    <div className="profile-input">
+                        <label><SiX/> (Twitter)</label>
+                        <input type="url" placeholder="https://x.com/…" value={xUrl ?? ""} onChange={(e) => setXUrl(e.target.value)}/>
+                    </div>
+                    <div className="profile-input">
+                        <label><SiFacebook/> Facebook</label>
+                        <input type="url" placeholder="https://facebook.com/…" value={facebookUrl ?? ""} onChange={(e) => setFacebookUrl(e.target.value)}/>
+                    </div>
+                </div>
             </div>
 
             <div className="personal-security">
@@ -191,33 +244,34 @@ const MyProfile = () => {
                     </button>
                 </div>
                 <div className="personal-security-password">
-                    <label>current password</label>
+                    <label>Current Password</label>
                     <div className="password-input-container">
-                        <input type={canSeePassword ? `text` : `password`} value={oldPassword} onChange={(e) => setOldPassword(e.target.value)}/>
+                        <input type={canSeePassword ? "text" : "password"} value={oldPassword} onChange={(e) => setOldPassword(e.target.value)}/>
                         <button type="button" className="view-password" onClick={toggleViewPassword}>
                             {canSeePassword ? <EyeOffIcon/> : <Eye/>}
                         </button>
-                    </div>   
-                </div> 
-                <div className="personal-security-password">
-                    <label>new password</label>
-                    <div className="password-input-container">
-                        <input type={canSeePassword ? `text` : `password`} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}/>
-                        <button type="button" className="view-password" onClick={toggleViewPassword}>
-                            {canSeePassword ? <EyeOffIcon/> : <Eye/>}
-                        </button>
-                    </div>      
+                    </div>
                 </div>
                 <div className="personal-security-password">
-                    <label>confirm new password</label>
+                    <label>New Password</label>
                     <div className="password-input-container">
-                        <input type={canSeePassword ? `text` : `password`} value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)}/>
+                        <input type={canSeePassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}/>
                         <button type="button" className="view-password" onClick={toggleViewPassword}>
                             {canSeePassword ? <EyeOffIcon/> : <Eye/>}
                         </button>
-                    </div>    
-                </div>       
+                    </div>
+                </div>
+                <div className="personal-security-password">
+                    <label>Confirm New Password</label>
+                    <div className="password-input-container">
+                        <input type={canSeePassword ? "text" : "password"} value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)}/>
+                        <button type="button" className="view-password" onClick={toggleViewPassword}>
+                            {canSeePassword ? <EyeOffIcon/> : <Eye/>}
+                        </button>
+                    </div>
+                </div>
             </div>
+            {viewImageModal && <ImageUploadModal onClose={()=>setViewImageModal(false)} handleUploadImage={handleImageUpload} previewUrl={previewUrl}/>}
         </div>
     )
 }

@@ -87,7 +87,7 @@ const LoginPage = () => {
                                 type={seePassword ? "text" : "password"}
                                 placeholder="Password"
                                 />
-                                <button onClick={() => setSeePassword(p => !p)}className="view-password-string">
+                                <button onClick={() => setSeePassword(p => !p)} type="button" className="view-password-string">
                                     {seePassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
                                 </button>
                             </div>

@@ -208,7 +208,7 @@ namespace backend.Controllers
                 existingProfilePicture.FileName = picture.FileName;
                 existingProfilePicture.ContentType = picture.ContentType;
                 await _context.SaveChangesAsync();
-                return Ok("Uploaded profile image");
+                return Ok("Updated profile image");
             }
         }
     }

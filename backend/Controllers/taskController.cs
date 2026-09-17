@@ -4,6 +4,7 @@ using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 
 namespace backend.Controllers
@@ -224,6 +225,26 @@ namespace backend.Controllers
             catch(Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("/progress/{taskId}/{progress}")]
+        public async Task<IActionResult> UpdateTaskProgress(Guid taskId, int progress)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId is null) return Unauthorized("Failed to locate user");
+            try
+            {
+                await _taskService.UpdateTaskProgress(userId, taskId, progress);
+                return Ok("Progress successfully modified");
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500,"An error occured");
             }
         }
 

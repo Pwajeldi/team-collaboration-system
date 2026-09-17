@@ -18,11 +18,13 @@ namespace backend.Services
         Task UpdateTaskStatus(Guid id, [FromBody] UpdateTaskStatusDto dto, TeamMember currentUser);
         Task DeleteTask(Guid id, TeamMember currentUser);
         Task<List<AssignableMemberResponse>> GetAssignableMembers(TeamMember user);
+        Task UpdateTaskProgress(string userId, Guid taskId, int progress);
     }
     public class TaskService : ITaskService
     {
         private readonly UserManager<TeamMember> _userManager;
         private readonly TeamDbContext _context;
+        private readonly ILogger<TaskService> _logger;
         private static readonly Dictionary<(string from, string to), string[]> AllowedTransitions = new()
         {
             [(TaskItemStatus.NotStarted, TaskItemStatus.InProgress)] = ["Assignee"],
@@ -39,10 +41,11 @@ namespace backend.Services
         ];
         private static readonly HashSet<string> ValidPriorities = [TaskPriority.Low, TaskPriority.Medium, TaskPriority.High];
 
-        public TaskService(UserManager<TeamMember> userManager, TeamDbContext context)
+        public TaskService(UserManager<TeamMember> userManager, TeamDbContext context, ILogger<TaskService> logger)
         {
             _userManager = userManager;
             _context = context;
+            _logger = logger;
         }
 
         public async Task<TaskItem> CreateTask(CreateTaskDto dto, TeamMember currentUser)
@@ -284,9 +287,36 @@ namespace backend.Services
             var canTransition = (isAssignee && allowedRole.Contains("Assignee"))
                 || (isManagerOrAdmin && allowedRole.Contains("Manager")) || (isManagerOrAdmin && allowedRole.Contains("Admin"));
             if (!canTransition) throw new UnauthorizedAccessException("You do not have permission");
+            if (task.Status == TaskItemStatus.NotStarted && dto.Status == TaskItemStatus.InProgress)
+            {
+                task.Progress = 5;
+            }
             task.Status = dto.Status;
             if (dto.Status == TaskItemStatus.Completed) task.CompletedAt = DateTime.UtcNow;
+            
             await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateTaskProgress(string userId, Guid taskId, int progress)
+        {
+            try
+            {
+                if (progress <= 0 || progress > 100) throw new ArgumentException("Progress must be between 0 and 100");
+                var rowsAffected = await _context.Tasks
+                    .Where(t => t.Id == taskId && t.AssignedToId == userId)
+                    .ExecuteUpdateAsync(s => s.SetProperty(t => t.Progress, progress));
+                if (rowsAffected == 0) throw new Exception("Failed to modify progress");
+            }
+            catch(ArgumentException ex)
+            {
+                _logger.LogError(ex, "User failed to update task - {Error}", ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to modify task progress - {Error}", ex.InnerException);
+                throw;
+            }
         }
     }
 }

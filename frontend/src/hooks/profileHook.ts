@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { getMyProfile, resetPassword, updateMyProfile } from "../api/profileApi"
+import { getMyProfile, resetPassword, updateMyProfile, uploadProfilePicture } from "../api/profileApi"
 import toast from "react-hot-toast"
 
 
@@ -33,5 +33,17 @@ export const useResetPassword = () => {
         onError: (error) => {
             toast.error(error.message)
         }
+    })
+}
+
+export const useUploadProfilePicture = () => {
+    return useMutation({
+        mutationFn: uploadProfilePicture,
+        onSuccess:(data) => {
+            toast.success(`${data}`);
+        },
+        onError:(error) => {
+            toast.error(`${error.message}`);
+        },
     })
 }

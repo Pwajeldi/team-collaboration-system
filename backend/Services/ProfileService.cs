@@ -18,13 +18,15 @@ namespace backend.Services
         private readonly TeamDbContext _context;
         private readonly UserManager<TeamMember> _userManager;
         private readonly ILogger<ProfileService> _logger;
+        private readonly IConfiguration _configuration;
 
         public ProfileService(TeamDbContext context, UserManager<TeamMember> userManager, 
-            ILogger<ProfileService> logger)
+            ILogger<ProfileService> logger, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task ChangePassword(string userId, ChangePasswordDto dto)
@@ -49,6 +51,7 @@ namespace backend.Services
 
         public async Task<UserProfileResponse> GetMyProfile(string userId)
         {
+            var devUrl = _configuration["CloudflareR2:DevelopmentUrl"] ?? throw new Exception("DevUrl not configured");
             var profile = await _context.UserProfiles.Where(p => p.UserId == userId)
                 .Select(p => new UserProfileResponse
                 {
@@ -61,7 +64,7 @@ namespace backend.Services
                     Email = p.Email,
                     DepartmentId = p.DepartmentId,
                     JobTitle = p.JobTitle,
-                    ProfilePictureUrl = p.ProfilePictureBlobName,
+                    ProfilePictureUrl = $"{devUrl}/{p.ProfilePictureBlobName}",
                     FacebookUrl = p.FacebookUrl,
                     GithubUrl = p.GithubUrl,
                     LinkedInUrl = p.LinkedInUrl,
@@ -69,7 +72,6 @@ namespace backend.Services
                     Xurl = p.Xurl,
                 })
                 .FirstOrDefaultAsync();
-                //?? throw new KeyNotFoundException("User's profile does not exist");
             if(profile is null)
             {
                 var member = await _userManager.FindByIdAsync(userId);
@@ -123,6 +125,10 @@ namespace backend.Services
             if(dto.Xurl is not null && dto.Xurl.Contains("x.com"))
             {
                 profile.Xurl = dto.Xurl;
+            }
+            if (dto.DateOfBirth.HasValue)
+            {
+                profile.DateOfBirth = dto.DateOfBirth.Value;
             }
             await _context.SaveChangesAsync();
             var updatedProfile = new UserProfileResponse

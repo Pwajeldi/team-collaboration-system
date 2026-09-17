@@ -186,7 +186,6 @@ const ChatPage = () => {
                     />
                 )}
                 <div className="chat-input-row">
-                    {/* NEW — hidden native file input, triggered by the paperclip button */}
                     <input
                         ref={fileInputRef}
                         type="file"

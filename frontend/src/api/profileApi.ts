@@ -61,3 +61,19 @@ export const resetPassword = async(payload: PasswordResetDto) => {
         }
     }
 }
+
+export const uploadProfilePicture = async(image: File) => {
+    try{
+        const formData = new FormData();
+        formData.append("picture", image);
+        const response = await api.post<string>(`/files/profile/picture/upload`, formData);
+        return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data)
+        }else{
+            throw new Error(error as string)
+        }
+    }
+}
