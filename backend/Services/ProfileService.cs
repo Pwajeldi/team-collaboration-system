@@ -64,7 +64,7 @@ namespace backend.Services
                     Email = p.Email,
                     DepartmentId = p.DepartmentId,
                     JobTitle = p.JobTitle,
-                    ProfilePictureUrl = $"{devUrl}/{p.ProfilePictureBlobName}",
+                    ProfilePictureUrl = p.ProfilePictureBlobName != null ? $"{devUrl}/{p.ProfilePictureBlobName}" : null,
                     FacebookUrl = p.FacebookUrl,
                     GithubUrl = p.GithubUrl,
                     LinkedInUrl = p.LinkedInUrl,

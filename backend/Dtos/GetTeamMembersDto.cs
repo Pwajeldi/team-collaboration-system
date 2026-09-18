@@ -68,5 +68,6 @@ namespace backend.Dtos
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public int UnreadMessages { get; set; }
+        public string? ProfilePictureUrl {get; set; }
     }
 }

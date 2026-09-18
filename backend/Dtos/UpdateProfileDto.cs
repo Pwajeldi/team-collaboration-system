@@ -12,7 +12,6 @@ namespace backend.Dtos
         public string? GithubUrl { get; set; }
         public string? Xurl { get; set; }
         public string? FacebookUrl { get; set; }
-        public string? ProfilePictureUrl { get; set; }
     }
 
     public class UserProfileResponse

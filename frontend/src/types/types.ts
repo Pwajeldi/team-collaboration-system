@@ -41,6 +41,7 @@ export interface LoginResponse{
     email: string,
     fullName: string,
     department: string,
+    profilePictureUrl: string | null,
 }
 
 export interface Attachments{
@@ -86,6 +87,7 @@ export interface UserList{
     userId: string,
     email: string,
     unreadMessages: number,
+    profilePictureUrl: string | null
 }
 
 export interface UpdateTaskDto {
@@ -340,7 +342,7 @@ export interface UserProfileResponse{
     githubUrl: string;
     xurl: string;
     facebookUrl: string;
-    profilePictureUrl: string;
+    profilePictureUrl: string | null;
 }
 
 export interface UpdateProfileDto{
@@ -351,7 +353,6 @@ export interface UpdateProfileDto{
     githubUrl?: string;
     xurl?: string
     facebookUrl?: string;
-    profilePictureUrl?: string;
 }
 
 export interface PasswordResetDto{

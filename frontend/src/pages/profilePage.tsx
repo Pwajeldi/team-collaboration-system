@@ -131,14 +131,14 @@ const MyProfile = () => {
                         {uploadPicture.isPending && previewUrl
                             ? <img src={previewUrl} alt="Profile picture" />
                             : data?.profilePictureUrl
-                                ? (
-                                    <img
-                                        src={data.profilePictureUrl}
-                                        alt="Profile picture"
-                                        onError={() => console.error("Failed to load profile picture:", data.profilePictureUrl)}
-                                    />
-                                )
-                                : <span>{getInitials(`${firstName} ${lastName}`)}</span>
+                            ? (
+                                <img
+                                    src={data.profilePictureUrl}
+                                    alt="Profile picture"
+                                    onError={() => console.error("Failed to load profile picture:", data.profilePictureUrl)}
+                                />
+                            )
+                            : <span>{getInitials(`${firstName} ${lastName}`)}</span>
                         }
                     </div>
                     <input type="file" accept="image/*" ref={fileInputRef} hidden onChange={handlePictureSelect}/>

@@ -108,8 +108,8 @@
 }
 
 .user-list-item .avatar {
-    width: 36px;
-    height: 36px;
+    width: 43px;
+    height: 43px;
     border-radius: 50%;
     background: #6264a7;
     color: #fff;
@@ -168,4 +168,12 @@
     border-radius: 50%;
     background: #22c55e;
     border: 2px solid #fff;
+}
+
+.avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
 }

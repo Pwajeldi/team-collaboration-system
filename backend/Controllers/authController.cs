@@ -33,7 +33,8 @@ namespace backend.Controllers
                     role = loginResponse.Role,
                     email = loginResponse.Email,
                     fullName = loginResponse.FullName,
-                    department = loginResponse.Department
+                    department = loginResponse.Department,
+                    profilePictureUrl = loginResponse.ProfilePictureUrl,
                 });
             }
             catch (UnauthorizedAccessException ex)

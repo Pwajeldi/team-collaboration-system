@@ -150,7 +150,9 @@ namespace backend.Services
             };
             var accessToken = await GenerateAccessToken(user);
             var refreshToken = await DeleteAndGenerateRefreshToken(user.Id);
+            var devUrl = _configuration["CloudflareR2:DevelopmentUrl"] ?? throw new Exception("DevUrl not configured");
             var fullName = $"{user.FirstName} {user.LastName}";
+            var profilePictureUrl = user.ProfilePictureBlobName != null ? $"{devUrl}/{user.ProfilePictureBlobName}" : null;
             var department = await _teamDbContext.Departments.Where(d => d.Id == user.DepartmentId).Select(d => d.DepartmentName).FirstOrDefaultAsync();
             if (department == null) throw new KeyNotFoundException("Failed to locate department");
             var email = user.Email;
@@ -163,9 +165,9 @@ namespace backend.Services
                 Role = role.FirstOrDefault() ?? string.Empty,
                 Email = email ?? throw new KeyNotFoundException("Failed to locate email"),
                 FullName = fullName,
-                Department = department
+                Department = department,
+                ProfilePictureUrl = profilePictureUrl,
             };
-            
         }
 
         public async Task UserForgotPassword(string email)

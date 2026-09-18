@@ -42,6 +42,9 @@ const LoginPage = () => {
             sessionStorage.setItem("email", userEmail);
             sessionStorage.setItem("fullName", fullName);
             sessionStorage.setItem("department", department);
+            if(login.data.profilePictureUrl){
+                sessionStorage.setItem("profilePictureUrl", login.data.profilePictureUrl);
+            }  
             const isAdmin = role === "admin";
             const isManager = role === "manager";
             navigate(isAdmin ? "/admindashboard" : isManager ? "/managerdashboard" : "/regulardashboard");

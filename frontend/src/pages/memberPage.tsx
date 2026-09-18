@@ -8,6 +8,7 @@ import "../styles/memberPage.css"
 import { useFetchDepartments } from "../hooks/departmentHook";
 import UserActionsMenu from "../components/usersActionsMenu";
 import Loader from "../components/loader";
+import type { selectedUser } from "../contexts/chatContext";
 
 const features = tableFeatures({
     columnFilteringFeature,
@@ -56,7 +57,7 @@ const MembersPage = () => {
             cell: ({row}) => {
                 const userId = row.original.memberId;
                 const fullName = `${row.original.firstName} ${row.original.lastName}`;
-                const user = {userId, fullName};
+                const user:selectedUser = {userId, fullName, profilePictureUrl:null}; //to be revisited
                 return(
                     <UserActionsMenu user={user}/>
                 )

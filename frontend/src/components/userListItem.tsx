@@ -14,10 +14,22 @@ const UserListItem = ({user}: UserListItemProps) => {
     <button
         key={user.userId}
         className={`user-list-item ${selectedUser?.userId === user.userId ? "active" : ""}`}
-        onClick={() => setSelectedUser({userId:user.userId, fullName: user.fullName})}
+        onClick={() => setSelectedUser(
+            {userId:user.userId, 
+            fullName: user.fullName,
+            profilePictureUrl: user.profilePictureUrl ? user.profilePictureUrl : null,
+        }
+        )}
     >
         <span className="avatar-wrapper">
-            <span className="avatar">{getInitials(user.fullName)}</span>
+            <span className="avatar">
+                {user.profilePictureUrl 
+                ? 
+                <img src={user.profilePictureUrl}/> 
+                : 
+                getInitials(user.fullName)
+                }              
+            </span>
             {isOnline && <span className="online-dot" />}
         </span>       
         <span className="user-name">{user.fullName}</span>

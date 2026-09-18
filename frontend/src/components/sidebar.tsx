@@ -16,15 +16,15 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
     const role = (sessionStorage.getItem("role") ?? "").toLowerCase();
     const isAdmin = role === "admin";
     const isManager = role === "manager";
-
     const fullName = sessionStorage.getItem("fullName") ?? "User";
+    const profilePictureUrl = sessionStorage.getItem("profilePictureUrl")
     const initials = getInitials(fullName)
 
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     const navigations = [
-        {label:"Dashboard", path:isAdmin? "/admindashboard" : isManager ? "managerdashboard" : "regulardashboard", icon:LayoutDashboard},
+        {label:"Dashboard", path:isAdmin ? "/admindashboard" : isManager ? "managerdashboard" : "regulardashboard", icon:LayoutDashboard},
         {label:"Employees", path:"/members", icon:Users},
         {label:"Messages", path:"/chat", icon:MessageSquareMoreIcon},
         {label:"Team Chat", path:"/departmentchat", icon:Hash},
@@ -77,15 +77,15 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
                     return(
                         <>
                         <NavLink 
-                        title={`${isCollapsed ? item.label : ``}`}
-                        key={item.path} 
-                        to={item.path} className={({isActive}) => 
-                            isActive
-                            ? `sidebar-link active ${isCollapsed ? `collapsed` : ``}`
-                            : `sidebar-link ${isCollapsed ? `collapsed` : ``}`
-                            }>
-                            <Icon size={20} className='sidebar-icon'/>
-                            {!isCollapsed && <span>{item.label}</span>}
+                            title={`${isCollapsed ? item.label : ``}`}
+                            key={item.path} 
+                            to={item.path} className={({isActive}) => 
+                                isActive
+                                ? `sidebar-link active ${isCollapsed ? `collapsed` : ``}`
+                                : `sidebar-link ${isCollapsed ? `collapsed` : ``}`
+                                }>
+                                <Icon size={20} className='sidebar-icon'/>
+                                {!isCollapsed && <span>{item.label}</span>}
                         </NavLink> 
                         </>
                     )
@@ -107,7 +107,9 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
                     </div>
                 )}
                 <button className="sidebar-user-trigger" onClick={() => setMenuOpen(o => !o)}>
-                    <span className="sidebar-avatar">{initials}</span>
+                    <span className="sidebar-avatar">
+                        {profilePictureUrl ? <img src={profilePictureUrl}/> : initials}
+                    </span>
                     {!isCollapsed && (
                     <div className="sidebar-user-info">
                         <span className="sidebar-user-name">{fullName}</span>

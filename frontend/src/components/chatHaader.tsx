@@ -11,7 +11,11 @@ const ChatHeader = () => {
     return(
         <div className="chat-header">
             <div className="chat-header-avatar">
-                {initials}
+                {
+                    selectedUser.profilePictureUrl 
+                    ? <img src={selectedUser.profilePictureUrl}/>
+                    :  initials
+                }             
             </div>
 
             <div className="chat-header-info">

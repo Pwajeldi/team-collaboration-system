@@ -22,16 +22,18 @@ namespace backend.Controllers
         private readonly ITeamMemberService _service;
         private readonly UserManager<TeamMember> _userManager;
         private readonly IConnectionManager _connectionManager;
+        private readonly IConfiguration _configuration;
 
         public teamController(TeamDbContext context, 
             ITeamMemberService service, UserManager<TeamMember> userManager,
-            IConnectionManager connectionManager
+            IConnectionManager connectionManager, IConfiguration configuration
             )
         {
             _context = context;
             _service = service;
             _userManager = userManager;
             _connectionManager = connectionManager;
+            _configuration = configuration;
         }
 
         [HttpGet("members")]
@@ -225,6 +227,8 @@ namespace backend.Controllers
         {
             var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (callerId is null) return Unauthorized();
+            var devUrl = _configuration["CloudflareR2:DevelopmentUrl"];
+            if (devUrl is null) return BadRequest("Dev url not configured");
             var query = _userManager.Users.ApplyMemberQueryFilters(queryParameters)
                 .Select(u => new GetMemberListDto
                 {
@@ -232,7 +236,8 @@ namespace backend.Controllers
                     UserId = u.Id,
                     Email = u.Email,
                     UnreadMessages = _context.Messages.Count(m => m.RecipientId == callerId && 
-                        m.SenderId == u.Id && !m.IsRead)
+                        m.SenderId == u.Id && !m.IsRead),
+                    ProfilePictureUrl = u.ProfilePictureBlobName != null ? $"{devUrl}/{u.ProfilePictureBlobName}" : null,
                 });
             var users = await query.ToListAsync();
             return Ok(users);
