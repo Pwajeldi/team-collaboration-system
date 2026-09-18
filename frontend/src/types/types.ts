@@ -94,7 +94,6 @@ export interface UpdateTaskDto {
     priority: TaskPriorityType;
     dueDate?: string | undefined;
     assigneeId: string;
-    progress?: number;
 }
 
 // types/types.ts (add alongside your existing DTOs)
@@ -367,3 +366,8 @@ export interface ChangePasswordDto{
     newPassword: string;
     confirmNewPassword: string;
 }
+
+export interface UpdateTaskProgressPayload{
+    taskId: string,
+    progress: number,
+} 

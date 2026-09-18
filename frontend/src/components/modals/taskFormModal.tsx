@@ -17,7 +17,6 @@ const taskSchema = z.object({
     assigneeId: z.string().min(1, "Select someone to assign this to"),
     priority: z.enum([TaskPriority.Low, TaskPriority.Medium, TaskPriority.High]),
     dueDate: z.string(),
-    progress: z.number().min(0).max(100),
 });
 
 const TaskFormModal = ({ task, onClose, onSuccess }: TaskFormModalProps) => {
@@ -34,8 +33,7 @@ const TaskFormModal = ({ task, onClose, onSuccess }: TaskFormModalProps) => {
             description: task?.description ?? undefined,
             assigneeId: task?.assignedToId ?? "",
             priority: task?.priority ?? TaskPriority.Medium,
-            dueDate: task?.dueDate ? task.dueDate.slice(0, 10) : undefined, // ISO -> yyyy-mm-dd for the date input
-            progress: task?.progress ?? 0,
+            dueDate: task?.dueDate ? task.dueDate.slice(0, 10) : undefined,
         },
         validators: { onSubmit: taskSchema },
         onSubmit: async ({ value }) => {
@@ -149,18 +147,6 @@ const TaskFormModal = ({ task, onClose, onSuccess }: TaskFormModalProps) => {
                                 )}
                             </form.Field>
                         </div>
-                    </div>
-
-                    <div className="task-form-group">
-                        <label htmlFor="progress">Progress</label>
-                        <form.Field name="progress">
-                            {(field) => (
-                                <input id="progress"
-                                type="number"
-                                value={field.state.value}
-                                onChange={(e) => field.handleChange(Number(e.target.value))}/>
-                            )}
-                        </form.Field>
                     </div>
 
                     <div className="task-form-group">

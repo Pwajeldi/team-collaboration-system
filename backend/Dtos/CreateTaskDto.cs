@@ -39,7 +39,6 @@
         public required string Priority { get; set; }
         public DateTime? DueDate { get; set; }
         public required string AssigneeId { get; set; }
-        public int? Progress { get; set; }
     }
 
     public class TaskQueryParameters

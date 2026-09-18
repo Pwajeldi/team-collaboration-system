@@ -228,7 +228,7 @@ namespace backend.Controllers
             }
         }
 
-        [HttpPut("/progress/{taskId}/{progress}")]
+        [HttpPut("progress/{taskId}/{progress}")]
         public async Task<IActionResult> UpdateTaskProgress(Guid taskId, int progress)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

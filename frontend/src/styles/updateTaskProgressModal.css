@@ -1,0 +1,92 @@
+.progress-update-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.progress-update-modal{
+    background-color: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap:15px;
+    height: fit-content;
+    width: 200px;
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.task-progress-input{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.task-progress-input p{
+    font-size: 12px;
+    font-weight: 500;
+    color: rgb(66, 65, 65);
+    width: 100%;
+    text-align: center;
+    margin-bottom: 7px;
+}
+
+.task-progress-input input{
+    padding: 0.6rem 0.75rem;
+    font-size: 0.88rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    font-family: inherit;
+    width: 100%;
+}
+
+.task-progress-input input:focus{
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(98, 100, 167, 0.15);
+}
+
+.update-progress-actions{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+}
+
+.cancel-progress{
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--color-primary);
+    flex: 1;
+    padding: 0.6rem;
+    transition: 0.2s ease;
+}
+
+.update-progress{
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    transition: 0.2s ease;
+}
+
+.cancel-progress:hover{
+    background-color: rgb(247, 244, 244);
+    transition: 0.2s ease;
+}
+
+.update-progress:hover{
+    background-color: var(--color-primary-hover);
+    transition: 0.2s ease;
+}

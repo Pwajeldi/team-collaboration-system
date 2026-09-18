@@ -250,12 +250,6 @@ namespace backend.Services
             task.Description = dto.Description?.Trim();
             task.Priority = dto.Priority;
             task.DueDate = dto.DueDate;
-            if(dto.Progress.HasValue)
-            {
-                if (dto.Progress < 0 || dto.Progress > 100)
-                    throw new ArgumentException("Progress must be between 0 and 100");
-                task.Progress = dto.Progress.Value;
-            }
             await _context.SaveChangesAsync();
 
             var updated = await _context.Tasks

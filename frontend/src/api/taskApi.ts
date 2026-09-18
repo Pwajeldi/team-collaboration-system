@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { AssignableMembers, CreateTaskDto, TaskQueryParams, TaskResponse, TaskStatusType, TaskSummaryResponse, UpdateTaskDto } from "../types/types";
+import type { AssignableMembers, CreateTaskDto, TaskQueryParams, TaskResponse, TaskStatusType, TaskSummaryResponse, UpdateTaskDto, UpdateTaskProgressPayload } from "../types/types";
 import api from "./axios";
 
 
@@ -119,6 +119,22 @@ export const fetchAssignableMembers = async () => {
 export const fetchTaskSummary = async () => {
     try{
         const {data} = await api.get<TaskSummaryResponse>("/task/summary");
+        return data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }  
+}
+
+export const updateTaskProgress = async(payload: UpdateTaskProgressPayload) => {
+    try{
+        const {data} = await api.put<string>(`/task/progress/${payload.taskId}/${payload.progress}`);
         return data;
     }
     catch(error: unknown){

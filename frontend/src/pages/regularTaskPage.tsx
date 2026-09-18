@@ -111,7 +111,8 @@ const RegularTaskPage = () => {
                     changeStatus={handleStatusChange} 
                     deleteTask={handleDelete} 
                     openEdit={openEdit}
-                    filters={filters}/>}
+                    filters={filters}/>
+                }
             </div>
 
             {modalOpen && (

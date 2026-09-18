@@ -1,5 +1,5 @@
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { createTask, deleteTask, fetchTask, fetchTasks, fetchTaskSummary, updateTask, updateTaskStatus } from "../api/taskApi";
+import { useQueryClient, useMutation, useQuery, QueryClient } from "@tanstack/react-query";
+import { createTask, deleteTask, fetchTask, fetchTasks, fetchTaskSummary, updateTask, updateTaskProgress, updateTaskStatus } from "../api/taskApi";
 import type { TaskQueryParams } from "../types/types";
 import { fetchAssignableMembers } from "../api/taskApi";
 import toast from "react-hot-toast";
@@ -75,5 +75,18 @@ export const useGetTaskSummary = () => {
     return useQuery({
         queryKey:["task-summary"],
         queryFn: fetchTaskSummary,
+    })
+}
+
+export const useUpdateTaskProgress = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: updateTaskProgress,
+        onSuccess:() => {
+            queryClient.invalidateQueries({queryKey:["tasks"]})
+        },
+        onError:(error) => {
+            toast.error(`${error.message}`)
+        }
     })
 }
