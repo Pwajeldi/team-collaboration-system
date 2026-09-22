@@ -68,5 +68,8 @@ namespace backend.Services
 
             return query;
         }
+
+        public static IQueryable<TeamMember> OnlyActive(this IQueryable<TeamMember> query)
+           => query.Where(u => u.IsActive);
     }
 }

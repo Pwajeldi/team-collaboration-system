@@ -124,6 +124,14 @@ tbody tr:hover {
     color: #b91c1c;
 }
 
+.table-contols-btn.blue {
+    color: var(--color-inProgress);
+}
+
+.table-contols-btn.blue {
+    color: rgb(77, 77, 233);
+}
+
 .table-contols-btn.danger:hover {
     background: #fef2f2;
 }

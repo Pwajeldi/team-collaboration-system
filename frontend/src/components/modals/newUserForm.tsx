@@ -7,6 +7,7 @@ import type { CreateMemberDto } from "../../types/types"
 import "../../styles/newUserForm.css"
 import { useFetchRoles } from "../../hooks/loginHook"
 import Loader from "../loader"
+import { PRIMARY_ROLES } from "./editMemberModal"
 
 type ShowUserFormProps = {
     onSuccess: () => void
@@ -24,8 +25,15 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
         email: z.email("Required field"),
         jobTitle: z.string("Required field"),
         department: z.int().positive("Select a department"),
-        role: z.string(),
+        primaryRole: z.enum(PRIMARY_ROLES),
+        secondaryRoles: z.array(z.string()),
     })
+
+    const secondaryRoleOptions = (rolesQuery.data ?? []).filter(
+        (r) => !PRIMARY_ROLES.includes(r.name.toLowerCase() as any)
+    );
+
+    const initialSecondaryRoles: string[] = [];
 
     const form = useForm({
         defaultValues: {
@@ -34,7 +42,8 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
             email: "",
             jobTitle: "",
             department: 0,
-            role: "",
+            primaryRole: "",
+            secondaryRoles: initialSecondaryRoles,
         },
         validators: {
             onSubmit: userSchema as any, //revisit soon
@@ -157,32 +166,61 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
                         </form.Field>
                     </div>
                     <div className="new-user-group">
-                        <label htmlFor="role">Role</label>
-                        <form.Field name="role">
-                            {(field) =>
-                                <>
-                                    <select
-                                        id="role"
-                                        value={field.state.value}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                        disabled={rolesQuery.isLoading}
-                                    >
-                                        <option value="" disabled>
-                                            {rolesQuery.isLoading ? "Loading roles…" : "Select a role"}
-                                        </option>
-                                        {rolesQuery.data?.map((role) => (
-                                            <option key={role.id} value={role.name}>
-                                                {role.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {field.state.meta.errors.length > 0 && (
-                                        <span className="field-error">{field.state.meta.errors[0]?.message}</span>
-                                    )}
-                                </>
-                            }
+                        
+                    </div>
+                    <div className="new-user-group">
+                        <label>Primary Role</label>
+                        <form.Field name="primaryRole">
+                            {(field) => (
+                                <div className="role-radio-group">
+                                    {PRIMARY_ROLES.map((role) => (
+                                        <label key={role} className="role-radio-option">
+                                            <input
+                                                type="radio"
+                                                name="primaryRole"
+                                                value={role}
+                                                checked={field.state.value === role}
+                                                onChange={() => field.handleChange(role)}
+                                            />
+                                            <span className="role-radio-label">{role}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
                         </form.Field>
                     </div>
+
+                    {secondaryRoleOptions.length > 0 && (
+                        <div className="new-user-group">
+                            <label>Secondary Roles</label>
+                            <form.Field name="secondaryRoles">
+                                {(field) => (
+                                    <div className="role-checkbox-group">
+                                        {secondaryRoleOptions.map((r) => {
+                                            const roleValue = r.name.toLowerCase();
+                                            const checked = field.state.value.includes(roleValue);
+                                            return (
+                                                <label key={r.id} className="role-checkbox-option">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        onChange={() => {
+                                                            field.handleChange(
+                                                                checked
+                                                                ? field.state.value.filter((v) => v !== roleValue)
+                                                                : [...field.state.value, roleValue]
+                                                            );
+                                                        }}
+                                                    />
+                                                    <span className="role-checkbox-label">{r.name}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </form.Field>
+                        </div>
+                    )}
 
                     <div className="new-user-actions">
                         <button type="button" className="new-user-btn-secondary" onClick={onClose}>

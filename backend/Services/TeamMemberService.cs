@@ -1,8 +1,12 @@
 ﻿using backend.Data;
 using backend.Dtos;
+using backend.Hubs;
 using backend.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using MimeKit.Encodings;
 
 namespace backend.Services
 {
@@ -13,6 +17,7 @@ namespace backend.Services
         Task GetMembers(GetMembersDto dto);
         Task DeleteMember(string id);
         Task DeactivateUser(string userId);
+        Task ActivateUser(string userId);
     }
     public class TeamMemberService : ITeamMemberService
     {
@@ -21,6 +26,8 @@ namespace backend.Services
         private readonly IBackgroundTaskQueue _queue;
         private readonly UserManager<TeamMember> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IConnectionManager _connectionManager;
+        private readonly IHubContext<ChatHub> _hub;
 
         private readonly string[] validImageFormats = { ".jpg", ".jpeg", ".png", ".bmp", ".webp" };
         private readonly long maxImageSize = 5 * 1024 * 1024; // 5 MB
@@ -28,13 +35,15 @@ namespace backend.Services
             ILogger<TeamMemberService> logger, 
             UserManager<TeamMember> userManager, 
             RoleManager<IdentityRole> roleManager,
-            IBackgroundTaskQueue queue)
+            IBackgroundTaskQueue queue, IConnectionManager connectionManager, IHubContext<ChatHub> hub)
         {
             _context = context;
             _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
             _queue = queue;
+            _hub = hub;
+            _connectionManager = connectionManager;
         }
         public async Task CreateNewMember(CreateMemberDto dto)
         {
@@ -46,6 +55,17 @@ namespace backend.Services
             {
                 throw new Exception("All required fields must be filled.");
             }
+            if (dto.PrimaryRole is null)
+            {
+                throw new ArgumentException("User must have a primary role");
+            }
+            var secondaryRoles = dto.SecondaryRoles.Select(r => r.Trim().ToLowerInvariant()).Distinct().ToList();
+            if (secondaryRoles.Any(role => !Roles.SecondaryRoles.Contains(role)))
+            {
+                throw new ArgumentException("One or more secondary roles are invalid");
+            }
+            var primaryRole = dto.PrimaryRole.Trim().ToLowerInvariant();
+            if (!Roles.PrimaryRoles.Contains(primaryRole)) throw new ArgumentException("Invalid primary role");
             var teamMember = new TeamMember
             {
                 UserName = dto.Email,
@@ -60,7 +80,7 @@ namespace backend.Services
                 
             try
             {
-                var creatingManager = string.Equals(Roles.Manager, dto.Role, StringComparison.OrdinalIgnoreCase);
+                var creatingManager = string.Equals(Roles.Manager, primaryRole, StringComparison.OrdinalIgnoreCase);
                 var department = await _context.Departments
                    .FirstOrDefaultAsync(d => d.Id == dto.Department) ?? throw new KeyNotFoundException("Department does not exist");
 
@@ -79,14 +99,19 @@ namespace backend.Services
                 var result = await _userManager.CreateAsync(teamMember);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(teamMember, dto.Role ?? Roles.Regular);
+                    await _userManager.AddToRoleAsync(teamMember, primaryRole ?? Roles.Regular);
             
+                    foreach(var role in secondaryRoles)
+                    {
+                        await _userManager.AddToRoleAsync(teamMember, role);
+                    }
+
                     await _context.SaveChangesAsync();
 
                     var userProfile = new UserProfile
                     {
                         UserId = teamMember.Id,
-                        Role = dto.Role ?? Roles.Regular,
+                        Role = primaryRole ?? Roles.Regular,
                         FirstName = teamMember.FirstName,
                         LastName= teamMember.LastName,
                         Email = teamMember.Email,
@@ -130,8 +155,32 @@ namespace backend.Services
         public async Task DeactivateUser(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId) ?? throw new KeyNotFoundException("User does not exist");
+            if (!user.IsActive) throw new Exception("User is currently deactivated");
             user.IsActive = false;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Failed to deactivate user");
+            }
+            var connections = _connectionManager.GetConnections(userId);
+            foreach (var connectionId in connections)
+            {
+                await _hub.Clients.Client(connectionId).SendAsync("ForceLogout");
+            }
             user.UserName = $"deleted_{user.Email}";
+        }
+
+        public async Task ActivateUser(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new KeyNotFoundException("User does not exist");
+            if (user.IsActive) throw new Exception("User is currently active");
+            user.IsActive = true;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Failed to activate user");
+            }
+            user.UserName = $"{user.Email}";
         }
 
         public async Task DeleteMember(string id)

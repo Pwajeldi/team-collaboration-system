@@ -6,6 +6,7 @@ import { useFetchDepartments } from "../../hooks/departmentHook";
 import { useFetchRoles } from "../../hooks/loginHook";
 import type { getMemberResponse } from "../../types/types";
 import "../../styles/newUserForm.css";
+import toast from "react-hot-toast";
 
 type EditMemberModalProps = {
     member: getMemberResponse;
@@ -13,7 +14,7 @@ type EditMemberModalProps = {
     onSuccess: () => void;
 };
 
-const PRIMARY_ROLES = ["admin", "manager", "regular"] as const;
+export const PRIMARY_ROLES = ["admin", "manager", "regular"] as const;
 
 const editSchema = z.object({
     firstName: z.string().min(2, "Required field"),
@@ -58,17 +59,20 @@ const EditMemberModal = ({ member, onClose, onSuccess }: EditMemberModalProps) =
                     primaryRole: value.primaryRole,
                     secondaryRoles: value.secondaryRoles,
                 },
+            }, {
+                onSuccess: () => {toast.success("User has been updated"); onClose()},
+                onError: () => {toast.error("Failed to complete this action"); onClose()},
             });
 
             // 2. diff secondary roles against what the member started with,
             // and fire the assign/remove endpoints only for what actually changed
-            const toAdd = value.secondaryRoles.filter((r) => !initialSecondaryRoles.includes(r));
-            const toRemove = initialSecondaryRoles.filter((r) => !value.secondaryRoles.includes(r));
+           // const toAdd = value.secondaryRoles.filter((r) => !initialSecondaryRoles.includes(r));
+            //const toRemove = initialSecondaryRoles.filter((r) => !value.secondaryRoles.includes(r));
 
-            await Promise.all([
-                ...toAdd.map((role) => assignRole.mutateAsync({ userId: member.memberId, role })),
-                ...toRemove.map((role) => removeRole.mutateAsync({ userId: member.memberId, role })),
-            ]);
+            //await Promise.all([
+              //  ...toAdd.map((role) => assignRole.mutateAsync({ userId: member.memberId, role })),
+                //...toRemove.map((role) => removeRole.mutateAsync({ userId: member.memberId, role })),
+            //]);
 
             onSuccess();
         },

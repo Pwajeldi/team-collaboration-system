@@ -70,6 +70,21 @@
     transition: 0.2s ease;
 }
 
+.activate-confirm{
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    transition: 0.2s ease;
+}
+
+.activate-confirm:hover{
+    background-color: var(--color-primary-hover);
+    transition: 0.2s ease;
+}
+
 .profile-image-preview{
     border: none;
     width: 8rem;

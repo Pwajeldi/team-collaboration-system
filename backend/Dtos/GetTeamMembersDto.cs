@@ -32,7 +32,8 @@ namespace backend.Dtos
         public string Email { get; set; } = string.Empty;
         public string? JobTitle { get; set; }
         [Required] public int Department { get; set; }
-        public string? Role { get; set; }
+        public string PrimaryRole { get; set; } = string.Empty;
+        public List<string> SecondaryRoles { get; set; } = [];
     }
 
     public class GetMemberResponse
@@ -48,6 +49,7 @@ namespace backend.Dtos
         public string PrimaryRole { get; set; } = string.Empty;
         public List<string> SecondaryRoles { get; set; } = [];
         public string ProfilePictureUrl { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
     }
 
     public class LoginDto

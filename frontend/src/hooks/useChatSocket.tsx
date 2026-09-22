@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import * as signalR from "@microsoft/signalr";
-import { getConnection } from "../services/signalr";
+import { getConnection, stopConnection } from "../services/signalr";
 import { getUserId } from "../services/jwtdecode";
 import type {
     DepartmentMessageResponse,
@@ -100,6 +100,12 @@ export const useChatSocket = () => {
         ));
     }
 
+    const handleForceLogout = async() => {
+        await stopConnection();
+        sessionStorage.clear();
+        navigate("/");
+    }
+
     const handleMessagesRead = (messageIds: number[]) => {
         const idSet = new Set(messageIds);
         queryClient.setQueriesData(
@@ -158,6 +164,7 @@ export const useChatSocket = () => {
         connection.on("UserOnline", handleUserOnline);
         connection.on("UserOffline", handleUserOffline);
         connection.on("ReceiveMyMessage", handleReceive);
+        connection.on("ForceLogout", handleForceLogout);
 
         if (connection.state === signalR.HubConnectionState.Disconnected && !started.current) {
             started.current = true;
@@ -174,6 +181,7 @@ export const useChatSocket = () => {
             connection.off("UserOffline", handleUserOffline);
             connection.off("ReceiveMyMessage", handleReceive);
             connection.on("ReceiveNotification", handleReceiveNotification);
+            connection.off("ForceLogout", handleForceLogout)
         };
     }, [selectedUser?.userId]);
 };

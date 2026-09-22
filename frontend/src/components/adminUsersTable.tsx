@@ -6,13 +6,15 @@ import {
     globalFilteringFeature,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Search, Trash2 } from "lucide-react";
-import { useGetMembers, useDeleteMember } from "../hooks/memberHook";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Search, UserCheck, UserX } from "lucide-react";
+import { useGetMembers } from "../hooks/memberHook";
 import type { getMemberResponse } from "../types/types";
 import { useFetchDepartments } from "../hooks/departmentHook";
 import { useFetchRoles } from "../hooks/loginHook";
 import Loader from "./loader";
 import DeleteUserModal from "./modals/deleteUserModal";
+import { useActivateMember, useDeactivateMember } from "../hooks/adminhooks";
+import ActivateUserModal from "./modals/activateUserModal";
 
 const features = tableFeatures({
     columnFilteringFeature,
@@ -36,7 +38,9 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
     const [departmentFilter, setDepartmentFilter] = useState<number>();
     const [roleFilter, setRoleFilter] = useState("");
     const [userToDelete, setUserToDelete] = useState<getMemberResponse>();
+    const [userToActivate, setUserToActivate] = useState<getMemberResponse>();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showActivateModal, setShowActivateModal] = useState(false);
     const departmentsQuery = useFetchDepartments();
     const rolesQuery = useFetchRoles();
     const query = useGetMembers(pagination.pageIndex, pagination.pageSize, {
@@ -44,13 +48,28 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
         departmentId: departmentFilter,
         jobTitle: "",
     });
-    const deleteMember = useDeleteMember();
+    const deactivateMember = useDeactivateMember();
+    const activateMember = useActivateMember();
 
-    const handleDelete = async (member: getMemberResponse) => {
-        await deleteMember.mutateAsync(member.memberId, {
+    const handleDeactivate = async (member: getMemberResponse) => {
+        await deactivateMember.mutateAsync(member.memberId, {
             onSuccess:() => {
                 setShowDeleteModal(false)
-            }
+            },
+            onError:() => {
+                setShowDeleteModal(false)
+            },
+        });
+    };
+
+    const handleActivate = async (member: getMemberResponse) => {
+        await activateMember.mutateAsync(member.memberId, {
+            onSuccess:() => {
+                setShowActivateModal(false)
+            },
+            onError:() => {
+                setShowActivateModal(false)
+            },
         });
     };
 
@@ -89,12 +108,19 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
                     <button className="table-contols-btn" onClick={() => onEdit(row.original)} aria-label="Edit">
                         <Pencil size={14} />
                     </button>
-                    <button className="table-contols-btn danger" onClick={() => {
+                    {row.original.isActive ? (
+                        <button className="table-contols-btn danger" onClick={() => {
                         setUserToDelete(row.original);
                         setShowDeleteModal(true);
-                    }} aria-label="Delete">
-                        <Trash2 size={14} />
+                            }} aria-label="Deactivate">
+                        <UserX size={14} />
                     </button>
+                    ) : <button className="table-contols-btn blue" onClick={() => {
+                        setUserToActivate(row.original);
+                        setShowActivateModal(true);
+                    }} aria-label="Activate">
+                        <UserCheck size={14} />
+                    </button>}        
                 </div>
             ),
         }),
@@ -201,7 +227,8 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
                 <button className="table-contols-btn" onClick={()=>table.lastPage()} disabled={!table.getCanNextPage()}>{<ChevronsRight/>}</button>
             </div>
         </div>
-        {showDeleteModal && <DeleteUserModal userName={`${userToDelete?.firstName} ${userToDelete?.lastName}`} handleDelete={() => handleDelete(userToDelete!)} onClose={() => setShowDeleteModal(false)}/>}
+        {showDeleteModal && <DeleteUserModal userName={`${userToDelete?.firstName} ${userToDelete?.lastName}`} handleDelete={() => handleDeactivate(userToDelete!)} onClose={() => setShowDeleteModal(false)}/>}
+        {showActivateModal && <ActivateUserModal userName={`${userToActivate?.firstName} ${userToActivate?.lastName}`} handleActivate={() => handleActivate(userToActivate!)} onClose={() => setShowActivateModal(false)}/>}
     </div>
     );
 };

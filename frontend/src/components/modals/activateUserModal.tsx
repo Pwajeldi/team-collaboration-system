@@ -2,24 +2,24 @@ import "../../styles/logoutModal.css"
 
 type DeleteUserProps = {
     onClose: () => void,
-    handleDelete: () => void,
+    handleActivate: () => void,
     userName: string,
 }
 
-const DeleteUserModal = ({onClose, handleDelete, userName}: DeleteUserProps) => {
+const ActivateUserModal = ({onClose, handleActivate, userName}: DeleteUserProps) => {
     return(
         <div className="logout-overlay">
             <div className="logout-modal">
                 <div className="logout-text">
-                    <p>Deactivate {`${userName}`} from system?</p>
+                    <p>Activate {`${userName}`}</p>
                 </div>
                 <div className="logout-button-container">
                     <button className="logout-cancel" onClick={onClose}>Cancel</button>
-                    <button className="logout-confirm" onClick={handleDelete}>Confirm</button>
+                    <button className="activate-confirm" onClick={handleActivate}>Activate</button>
                 </div>
             </div>
         </div>
     )
 }
 
-export default DeleteUserModal
+export default ActivateUserModal

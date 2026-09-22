@@ -201,8 +201,7 @@ const ChatPage = () => {
                     >
                         <Paperclip size={18} />
                     </button>
-                    <input
-                        type="text"
+                    <textarea
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}

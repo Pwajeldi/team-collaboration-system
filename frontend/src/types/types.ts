@@ -20,7 +20,8 @@ export interface CreateMemberDto{
     email: string,
     jobTitle: string,
     department: number,
-    role: string,
+    primaryRole: string;
+    secondaryRoles: string[]
 }
 
 export interface PagedMembersResponse{
@@ -238,6 +239,7 @@ export interface getMemberResponse {
     departmentId: number;
     primaryRole: string;
     secondaryRoles: string[]; 
+    isActive: boolean;
 }
 
 export interface UpdateMemberDto {

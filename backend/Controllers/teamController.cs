@@ -41,7 +41,13 @@ namespace backend.Controllers
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
+            var isAdmin = User.IsInRole(Roles.Admin);
             var query = _userManager.Users.Include(m => m.Department).ApplyMemberQueryFilters(filter).OrderBy(m => m.Email);
+            if (!isAdmin)
+            {
+                query = query.Where(u => u.IsActive).OrderBy(m => m.Email);
+            }
+            
             var totalMembers = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalMembers/(double)pageSize);
             var pagedMembers = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
@@ -73,6 +79,7 @@ namespace backend.Controllers
                     DepartmentId = m.DepartmentId,
                     PrimaryRole = userRoles.FirstOrDefault(r => Roles.PrimaryRoles.Contains(r)) ?? string.Empty,
                     SecondaryRoles = userRoles.Where(r => Roles.SecondaryRoles.Contains(r)).ToList(),
+                    IsActive = m.IsActive,
                 };
             }).ToList();
 
@@ -109,7 +116,8 @@ namespace backend.Controllers
                 Department = member.Department.DepartmentName,
                 PrimaryRole = userRoles.FirstOrDefault(r => Roles.PrimaryRoles.Contains(r)) ?? string.Empty,
                 SecondaryRoles = userRoles.Where(r => Roles.SecondaryRoles.Contains(r)).ToList(),
-                ProfilePictureUrl = string.Empty // I'll get back to you
+                ProfilePictureUrl = string.Empty, // I'll get back to you
+                IsActive = member.IsActive,
             };
             return Ok(response);
         }
@@ -203,8 +211,8 @@ namespace backend.Controllers
             }
         }
 
-        [Authorize(Roles = "admin")]
-        [HttpDelete("dactivate/{id}")]
+        [Authorize(Roles = Roles.Admin)]
+        [HttpDelete("deactivate/{userid}")]
         public async Task<IActionResult> DeactivateUser(string userId)
         {
             try
@@ -217,6 +225,23 @@ namespace backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpPut("activate/{userid}")]
+        public async Task<IActionResult> ActivateUser(string userId)
+        {
+            try
+            {
+                await _service.ActivateUser(userId);
+                return Ok("User has been made active");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
 
         [HttpGet("messages")]
         public async Task<IActionResult> GetMessages([FromQuery]string otherUserId, [FromQuery]string? encodedCursor)
@@ -274,7 +299,7 @@ namespace backend.Controllers
             if (callerId is null) return Unauthorized();
             var devUrl = _configuration["CloudflareR2:DevelopmentUrl"];
             if (devUrl is null) return BadRequest("Dev url not configured");
-            var query = _userManager.Users.ApplyMemberQueryFilters(queryParameters)
+            var query = _userManager.Users.ApplyMemberQueryFilters(queryParameters).OnlyActive()
                 .Select(u => new GetMemberListDto
                 {
                     FullName = $"{u.FirstName} {u.LastName}",

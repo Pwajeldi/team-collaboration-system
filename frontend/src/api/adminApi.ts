@@ -33,6 +33,36 @@ export const deleteMember = async (id: string) => {
     }   
 };
 
+export const deactivateMember = async (id: string) => {
+    try{
+        await api.delete(`/team/deactivate/${id}`);
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }   
+};
+
+export const activateMember = async (id: string) => {
+    try{
+        await api.put(`/team/activate/${id}`);
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data);
+        }
+        else{
+            console.log(error as string)
+            throw error;
+        }
+    }   
+};
+
 export const assignRole = async ({ userId, role }: { userId: string; role: string }) => {
     try{
         const { data } = await api.post(`/auth/users/${userId}/assign-role/${role}`);
