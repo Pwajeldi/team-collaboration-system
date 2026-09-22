@@ -16,8 +16,8 @@ type EventFormModalProps = {
 
 const eventSchema = z.object({
     title: z.string().min(2, "Title is too short"),
-    description: z.string(),
-    location: z.string(),
+    description: z.string("Description is required"),
+    location: z.string("Location is required"),
     start: z.string().min(1, "Start time is required"),
     end: z.string().min(1, "End time is required"),
     attendeeIds: z.array(z.string()),

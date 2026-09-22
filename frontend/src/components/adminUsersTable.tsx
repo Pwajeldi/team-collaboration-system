@@ -147,7 +147,7 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
                     setDepartmentFilter(value === "" ? undefined : Number(value))
                 }}
                 >
-                {departmentsQuery.isLoading ? "Loading departments…" : "All Departments"}
+                {departmentsQuery.isLoading ? "Loading departments…" : <option value="">All Departments</option>}
                 {departmentsQuery.data?.map((d) => (
                     <option key={d.departmentId} value={d.departmentId}>{d.departmentName}</option>
                 ))}
