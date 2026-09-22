@@ -6,7 +6,8 @@ import {useForm} from "@tanstack/react-form"
 import type { ChangePasswordDto } from "../types/types"
 import toast from "react-hot-toast"
 import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff,} from "lucide-react"
+import Loader from "../components/loader"
 
 const UserSetup = () => {
 
@@ -93,7 +94,7 @@ const UserSetup = () => {
                                     type={seePassword ? "text" : "password"}
                                     placeholder="Enter new password"
                                 />
-                                <button onClick={() => setSeePassword(p => !p)}className="view-password-string">
+                                <button type="button" onClick={() => setSeePassword(p => !p)}className="view-password-string">
                                     {seePassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
                                 </button>
                             </div>                  
@@ -112,13 +113,17 @@ const UserSetup = () => {
                                 type={seeConfirmPassword ? "text" : "password"}
                                 placeholder="Confirm password"
                                 />
-                                <button onClick={() => setSeeConfirmPassword(p => !p)}className="view-password-string">
+                                <button type="button" onClick={() => setSeeConfirmPassword(p => !p)}className="view-password-string">
                                     {seeConfirmPassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
                                 </button>
                             </div>
                             } 
                         </form.Field>
                     </div>
+
+                    <button className="login-btn" type="submit">
+                        {resetPassword.isPending ? <div><Loader size="sm" fullHeight={false}/></div> : "Reset password"}
+                    </button>
                 </form>
             </section>
         </main>

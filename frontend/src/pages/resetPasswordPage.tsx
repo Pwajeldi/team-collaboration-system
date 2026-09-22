@@ -83,7 +83,7 @@ const ResetPassworPage = () => {
                                 type={seePassword ? "text" : "password"}
                                 placeholder="Enter new password"
                                 />
-                                <button onClick={() => setSeePassword(p => !p)}className="view-password-string">
+                                <button type="button" onClick={() => setSeePassword(p => !p)}className="view-password-string">
                                     {seePassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
                                 </button>
                             </div>
@@ -101,7 +101,7 @@ const ResetPassworPage = () => {
                                 type={seeConfirmPassword ? "text" : "password"}
                                 placeholder="Confirm password"
                                 />
-                                <button onClick={() => setSeeConfirmPassword(p => !p)}className="view-password-string">
+                                <button type="button" onClick={() => setSeeConfirmPassword(p => !p)}className="view-password-string">
                                     {seeConfirmPassword ? <EyeOff size={18} color="#b5b7bb"/> : <Eye size={18} color="#b5b7bb"/>}
                                 </button>
                             </div>
