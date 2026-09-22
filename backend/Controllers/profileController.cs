@@ -46,6 +46,24 @@ namespace backend.Controllers
             }
         }
 
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserProfile(string userId)
+        {
+            try
+            {
+                var profile = await _profileService.FetchUserProfile(userId);
+                return Ok(profile);
+            }
+            catch(KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpDelete("delete")]
         public async Task<IActionResult> DeletetProfile()
         {

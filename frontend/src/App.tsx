@@ -17,6 +17,7 @@ import MyProfile from './pages/profilePage'
 import ForgotPasswordPage from './pages/forgotPAsswordPage'
 import ResetPassworPage from './pages/resetPasswordPage'
 import UserSetup from './pages/userSetupPage'
+import NotificationsPage from './pages/notificationsPage'
 
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { path: "/calendar", element: <Calendar/>, handle: { title: "Calendar" } },
       { path: "/myprofile", element: <MyProfile/>, handle: { title: "Profile" } },
       { path: "/admin", element: (<RequireRole role={["admin"]}><Administrator/></RequireRole>), handle: { title: "Administrator" } },
+      { path: "/notifications", element: (<NotificationsPage/>), handle: { title: "Notifications" }}
     ],
   },
 ]);

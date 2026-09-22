@@ -7,6 +7,7 @@ import type {
     DepartmentMessageResponse,
     EventResponse,
     MessageResponse,
+    NotificationResponseDto,
     PaginatedDepartmentMessageResponse,
     PaginatedMessageResponse,
 } from "../types/types";
@@ -16,6 +17,7 @@ import toast from "react-hot-toast";
 import { useChat } from "../contexts/chatContext";
 import { useNavigate } from "react-router";
 import { handleReadMessages } from "../pages/chatPage";
+import NotificationToast from "../components/toasts/notificationToast";
 
 export const useChatSocket = () => {
     const queryClient = useQueryClient();
@@ -133,6 +135,18 @@ export const useChatSocket = () => {
         queryClient.invalidateQueries({queryKey:["userList"]});
     }
 
+    const handleReceiveNotification = (notification: NotificationResponseDto) => {
+        queryClient.setQueryData<NotificationResponseDto[]>(["notifications"], (old = []) => [notification, ...old]);
+        toast.custom((t) => (
+            <NotificationToast
+            toastId={t.id}
+            title={notification.title}
+            type={notification.type}
+            onView={() => navigate("/notifications")}
+        />
+        ));
+    };
+
     useEffect(() => {
         const connection = getConnection();
 
@@ -159,6 +173,7 @@ export const useChatSocket = () => {
             connection.off("UserOnline", handleUserOnline);
             connection.off("UserOffline", handleUserOffline);
             connection.off("ReceiveMyMessage", handleReceive);
+            connection.on("ReceiveNotification", handleReceiveNotification);
         };
     }, [selectedUser?.userId]);
 };

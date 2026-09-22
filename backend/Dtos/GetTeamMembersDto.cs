@@ -44,6 +44,9 @@ namespace backend.Dtos
         public DateTime DateJoined { get; set; }
         public string JobTitle { get; set; } = string.Empty;
         public string Department { get; set; } = string.Empty;
+        public int DepartmentId { get; set; }
+        public string PrimaryRole { get; set; } = string.Empty;
+        public List<string> SecondaryRoles { get; set; } = [];
         public string ProfilePictureUrl { get; set; } = string.Empty;
     }
 
@@ -58,7 +61,8 @@ namespace backend.Dtos
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? JobTitle { get; set; }
-        public string? Role { get; set; }
+        public string? PrimaryRole { get; set; }
+        public List<string> SecondaryRoles { get; set; } = [];
         public int? DepartmentId { get; set; }
     }
 

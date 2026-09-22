@@ -12,6 +12,7 @@ namespace backend.Services
         Task DeleteProfile(string userId);
         Task<UserProfileResponse> UpdateMyProfile(string userId, UpdateProfileDto dto);
         Task ChangePassword(string userId, ChangePasswordDto dto);
+        Task<UserProfileResponse> FetchUserProfile(string userId);
     }
     public class ProfileService : IProfileService
     {
@@ -47,6 +48,33 @@ namespace backend.Services
         public async Task DeleteProfile(string userId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<UserProfileResponse> FetchUserProfile(string userId)
+        {
+            var userProfile = await _context.UserProfiles.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId) ?? throw new Exception("Unable to fetch profile");
+            var devUrl = _configuration["CloudflareR2:DevelopmentUrl"] ?? throw new Exception("Cloudflare Development url not congigured");
+            var response = new UserProfileResponse
+            {
+                Bio = userProfile.Bio,
+                DateJoined = userProfile.DateJoined,
+                DateOfBirth = userProfile.DateOfBirth,
+                DepartmentId = userProfile.DepartmentId,
+                Email = userProfile.Email,
+                FirstName = userProfile.FirstName,
+                LastName = userProfile.LastName,
+                FacebookUrl = userProfile.FacebookUrl,
+                GithubUrl = userProfile.GithubUrl,
+                IsActive = userProfile.IsActive,
+                JobTitle = userProfile.JobTitle,
+                LinkedInUrl = userProfile.LinkedInUrl,
+                PhoneNumber = userProfile.PhoneNumber,
+                Role = userProfile.Role,
+                ProfilePictureUrl = userProfile.ProfilePictureBlobName != null ? $"{devUrl}/{userProfile.ProfilePictureBlobName}" : null,
+                Xurl = userProfile.Xurl,
+            };
+            return response;
         }
 
         public async Task<UserProfileResponse> GetMyProfile(string userId)
@@ -92,6 +120,24 @@ namespace backend.Services
                     };
                     await _context.UserProfiles.AddAsync(newProfile);
                     await _context.SaveChangesAsync();
+                    var newUserProfile = new UserProfileResponse
+                    {
+                        FirstName = newProfile.FirstName,
+                        LastName = newProfile.LastName,
+                        PhoneNumber = newProfile.PhoneNumber,
+                        Bio = newProfile.Bio,
+                        DateJoined = newProfile.DateJoined,
+                        DateOfBirth = newProfile.DateOfBirth,
+                        Email = newProfile.Email,
+                        DepartmentId = newProfile.DepartmentId,
+                        JobTitle = newProfile.JobTitle,
+                        ProfilePictureUrl = newProfile.ProfilePictureBlobName != null ? $"{devUrl}/{newProfile.ProfilePictureBlobName}" : null,
+                        FacebookUrl = newProfile.FacebookUrl,
+                        GithubUrl = newProfile.GithubUrl,
+                        LinkedInUrl = newProfile.LinkedInUrl,
+                        Role = newProfile.Role,
+                        Xurl = newProfile.Xurl,
+                    };
                 }
             }
             return profile!;
@@ -131,6 +177,7 @@ namespace backend.Services
                 profile.DateOfBirth = dto.DateOfBirth.Value;
             }
             await _context.SaveChangesAsync();
+            var devUrl = _configuration["CloudflareR2:DevelopmentUrl"] ?? throw new Exception("DevUrl not configured");
             var updatedProfile = new UserProfileResponse
             {
                 Bio = profile.Bio,
@@ -147,7 +194,7 @@ namespace backend.Services
                 Role = profile.Role,
                 JobTitle = profile.JobTitle,
                 Xurl = profile.Xurl,
-                ProfilePictureUrl = profile.ProfilePictureBlobName,
+                ProfilePictureUrl = profile.ProfilePictureBlobName != null ? $"{devUrl}/{profile.ProfilePictureBlobName}" : null,
             };
             return updatedProfile;
         }

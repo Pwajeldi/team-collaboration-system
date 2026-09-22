@@ -38,15 +38,16 @@ const LoginPage = () => {
         if (login.isSuccess) {
             const { token, role, email: userEmail, fullName, department} = login.data;
             sessionStorage.setItem("accessToken", token);
-            sessionStorage.setItem("role", role);
+            sessionStorage.setItem("roles", JSON.stringify(role));
             sessionStorage.setItem("email", userEmail);
             sessionStorage.setItem("fullName", fullName);
             sessionStorage.setItem("department", department);
             if(login.data.profilePictureUrl){
                 sessionStorage.setItem("profilePictureUrl", login.data.profilePictureUrl);
             }  
-            const isAdmin = role === "admin";
-            const isManager = role === "manager";
+            const roles: string[] = JSON.parse(sessionStorage.getItem("roles") ?? "");
+            const isAdmin = roles.includes("admin");
+            const isManager = roles.includes("manager");
             navigate(isAdmin ? "/admindashboard" : isManager ? "/managerdashboard" : "/regulardashboard");
         }
     }, [login.isSuccess]);

@@ -12,7 +12,7 @@ namespace backend.Data
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var context = services.GetRequiredService<TeamDbContext>();
 
-            string[] roles = [Roles.Admin, Roles.Manager, Roles.Regular];
+            string[] roles = [Roles.Admin, Roles.Manager, Roles.Regular, Roles.HR];
             foreach(var role in roles)
             {
                 if(!await roleManager.RoleExistsAsync(role))
@@ -68,5 +68,9 @@ namespace backend.Data
         public const string Admin = "admin";
         public const string Manager = "manager";
         public const string Regular = "regular";
+        public const string HR = "hr";
+
+        public static readonly string[] PrimaryRoles = [Admin, Manager, Regular];
+        public static readonly string[] SecondaryRoles = [HR];
     }
 }

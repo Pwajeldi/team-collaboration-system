@@ -1,4 +1,6 @@
-﻿using backend.Dtos;
+﻿using backend.Data;
+using backend.Dtos;
+using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,11 +15,13 @@ namespace backend.Controllers
     {
         private readonly IAuthService _authService;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<TeamMember> _userManager;
 
-        public authController(IAuthService authService, RoleManager<IdentityRole> roleManager)
+        public authController(IAuthService authService, RoleManager<IdentityRole> roleManager, UserManager<TeamMember> userManager)
         {
             _authService = authService;
             _roleManager = roleManager;
+            _userManager = userManager;
         }
 
         [HttpPost("login")]
@@ -129,6 +133,42 @@ namespace backend.Controllers
                 r.Name
             }).ToListAsync();
             return Ok(roles);
+        }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpPost("users/{userID}/assign-role/{role}")]
+        public async Task<IActionResult> AssignRole(string userID, string role)
+        {
+            var newRole = role.Trim().ToLowerInvariant();
+            if(!Roles.SecondaryRoles.Contains(newRole))
+            {
+                return BadRequest("Invalid secondary role");
+            }
+            var user = await _userManager.FindByIdAsync(userID);
+            if (user is null) return NotFound("User not found");
+            var alreadyHasRole = await _userManager.IsInRoleAsync(user, newRole);
+            if (alreadyHasRole) return BadRequest("User already has this role");
+            var result = await _userManager.AddToRoleAsync(user, newRole);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+            return Ok($"Role '{role}' assigned successfully");
+        }
+
+        [Authorize(Roles = Roles.Admin)]
+        [HttpDelete("users/{userId}/roles/{role}")]
+        public async Task<IActionResult> RemoveRole(string userId, string role)
+        {
+            role = role.Trim().ToLowerInvariant();
+            if (!Roles.SecondaryRoles.Contains(role))
+            {
+                return BadRequest("Invalid secondary role");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null) return NotFound("User not found");
+            var alreadyHasRole = await _userManager.IsInRoleAsync(user, role);
+            if (!alreadyHasRole) return BadRequest("User does not have this role");
+            var result = await _userManager.RemoveFromRoleAsync(user, role);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+            return Ok($"Role '{role}' removed successfully");
         }
     }
 }

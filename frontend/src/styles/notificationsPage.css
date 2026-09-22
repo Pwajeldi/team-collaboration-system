@@ -1,0 +1,107 @@
+/* notificationsPage.css */
+.notifications-page {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.notifications-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+}
+
+.notif-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.notif-tabs button {
+    background: none;
+    border: none;
+    padding: 10px 4px;
+    margin-right: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #9ca3af;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.notif-tabs button.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 800px;
+}
+
+.notification-card {
+    display: flex;
+    gap: 14px;
+    background: var(--color-surface);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.notification-card.unread {
+    border-left: 3px solid var(--color-primary);
+}
+
+.notification-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.notif-icon-info { background: var(--color-inProgress); }
+.notif-icon-warning { background: #d97706; }
+.notif-icon-announcement { background: var(--color-primary); }
+.notif-icon-important { background: var(--color-severe); }
+
+.notification-body { flex: 1; min-width: 0; }
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.notification-title { font-weight: 700; font-size: 14px; }
+.notification-time { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+
+.notification-preview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    --webkit-line-clamp: 2;
+    --webkit-box-orient: vertical;
+}
+
+.notification-sender {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.notifications-empty {
+    text-align: center;
+    color: #9ca3af;
+    padding: 3rem;
+}

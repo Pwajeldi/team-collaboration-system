@@ -24,6 +24,9 @@ namespace backend.Data
         public DbSet<MeetingAttendee> MeetingAttendees { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<UserProfilePicture> UserProfilePictures { get; set; }
+        public DbSet<UserNotification> UserNotifications { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -174,6 +177,32 @@ namespace backend.Data
                 .WithOne(u => u.ProfilePicture)
                 .HasForeignKey<UserProfilePicture>(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.Entity<Notification>()
+                .HasOne(n => n.CreatedBy)
+                .WithMany()
+                .HasForeignKey(n => n.CreatedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserNotification>()
+                .HasOne(un => un.Notification)
+                .WithMany(n => n.UserNotifications)
+                .HasForeignKey(un => un.NotificationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserNotification>()
+                .HasOne(un => un.User)
+                .WithMany()
+                .HasForeignKey(un => un.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserNotification>()
+                .HasIndex(un => new { un.NotificationId, un.UserId })
+                .IsUnique();
+
+            builder.Entity<UserNotification>()
+                .HasIndex(un => un.UserId); // for "my notifications" / unread-count queries
         }
     }
 }

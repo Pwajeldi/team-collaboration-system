@@ -47,6 +47,28 @@
     background: #f5f5f5;
 }
 
+.role-radio-group,
+.role-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.role-radio-option,
+.role-checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.role-radio-label,
+.role-checkbox-label {
+    text-transform: capitalize;
+}
+
 .new-user-container form {
     display: grid;
     grid-template-columns: 1fr 1fr;

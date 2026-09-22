@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { getInitials } from '../services/getInitials';
 import { stopConnection } from "../services/signalr";
 import LogoutModal from './modals/logoutModal';
+//import { useGetNotifications } from '../hooks/notificationHook';
 
 type SidebarProps = {
     isCollapsed: boolean,
@@ -12,10 +13,12 @@ type SidebarProps = {
 }
 const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
     const navigate = useNavigate();
+    //const notificationsQuery = useGetNotifications();
+    //const unreadCount = notificationsQuery.data?.filter((n) => !n.isRead).length ?? 0;
     const [openLogoutModal, setOpenLogoutModal] = useState(false);
-    const role = (sessionStorage.getItem("role") ?? "").toLowerCase();
-    const isAdmin = role === "admin";
-    const isManager = role === "manager";
+    const roles: string[] = JSON.parse(sessionStorage.getItem("roles") ?? "");
+    const isAdmin = roles.includes("admin");
+    const isManager = roles.includes("manager");
     const fullName = sessionStorage.getItem("fullName") ?? "User";
     const profilePictureUrl = sessionStorage.getItem("profilePictureUrl")
     const initials = getInitials(fullName)
@@ -34,6 +37,7 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
             : 
             [{label:"Tasks", path:"/mytasks", icon:ClipboardCheck}]),
         {label:"Calendar", path:"/calendar", icon:Calendar},
+        {label: "Notifications", path:"/notifications", icon: Bell},
         ...(isAdmin ? [{label:"Administrator", path:"/admin", icon:UserShield}] : []),
     ];
 
@@ -113,7 +117,7 @@ const Sidebar = ({isCollapsed, toggleSidebar}: SidebarProps) => {
                     {!isCollapsed && (
                     <div className="sidebar-user-info">
                         <span className="sidebar-user-name">{fullName}</span>
-                        <span className="sidebar-user-role">{role}</span>
+                        <span className="sidebar-user-role">{roles}</span>
                     </div>)
                     }
                     

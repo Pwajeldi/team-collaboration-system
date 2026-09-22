@@ -162,7 +162,7 @@ namespace backend.Services
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 CookieOptions = options,
-                Role = role.FirstOrDefault() ?? string.Empty,
+                Role = role.ToList(),
                 Email = email ?? throw new KeyNotFoundException("Failed to locate email"),
                 FullName = fullName,
                 Department = department,

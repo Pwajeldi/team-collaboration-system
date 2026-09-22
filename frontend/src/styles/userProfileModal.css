@@ -1,0 +1,251 @@
+.user-profile-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+
+}
+
+.user-profile-overlay.show{
+    opacity: 1;
+    visibility: visible;
+}
+
+.user-profile-modal{
+    width: 450px;
+    height: 100%;
+    background: var(--color-surface);
+    overflow-y: auto;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
+    transform: translateX(100%);
+    transition: 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-profile-modal.open{
+    transform: translateX(0);
+    transition: 0.3s ease;
+}
+
+.user-profile-header{
+    width: 100%;
+    height: 3rem;
+    background-color: var(--color-primary);
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+.user-profile-header button{
+    margin-right: 1rem;
+    border: none;
+    background-color: transparent;
+    width: fit-content;
+    height: fit-content;
+}
+
+.user-info-top{
+    height: fit-content;
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+}
+
+.user-picture-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+}
+
+.user-picture-container{
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-background);
+}
+
+.user-picture-container img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+.user-info-details{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 9px;
+}
+
+.detail-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.detail-item span{
+    color: rgb(62, 167, 62);
+}
+
+.detail-role{
+    width: fit-content;
+    height: fit-content;
+    padding: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 18px;
+    background-color: rgb(183, 146, 218);
+}
+
+.user-detail-personal{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+}
+
+.user-profile-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.user-profile-error {
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-severe);
+}
+
+.user-picture-initials {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.user-job-title {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.online-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.online-status.online { color: var(--color-completed); }
+.online-status.offline { color: #9ca3af; }
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+}
+
+.user-contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-social-row {
+    display: flex;
+    gap: 10px;
+}
+
+.social-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.social-icon-btn.linkedin { background: #0A66C2; }
+.social-icon-btn.github { background: #171515; }
+.social-icon-btn.x { background: #000; }
+.social-icon-btn.facebook { background: var(--color-primary); }
+
+.user-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.user-info-card {
+    background: var(--color-background);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.user-info-card span {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+    margin-bottom: 3px;
+}
+
+.user-info-card p {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-header);
+    margin: 0;
+}
+
+.user-bio-section h3 {
+    font-size: 14px;
+    margin: 0 0 6px;
+}
+
+.user-bio-section p {
+    font-size: 13.5px;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.send-message-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
+
+.send-message-btn:hover {
+    background: var(--color-primary-hover);
+}

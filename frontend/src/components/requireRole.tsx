@@ -8,9 +8,10 @@ type RequireRoleProps = {
 };
 
 const RequireRole = ({ role, children }: RequireRoleProps) => {
-    const userRole = (sessionStorage.getItem("role") ?? "").toLowerCase();
-    if (role && !role.includes(userRole ?? "")) {
-        return <Navigate to="/dashboard" replace />;
+    const UserRoles: string[] = JSON.parse(sessionStorage.getItem("roles")?.toLocaleLowerCase() ?? "");
+    const hasRequiredRole = role.some((r) => UserRoles.includes(r))
+    if (role && !hasRequiredRole) {
+        return <Navigate to="/login" replace />;
     }
     return <>{children}</>;
 };

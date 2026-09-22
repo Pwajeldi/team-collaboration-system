@@ -37,7 +37,7 @@ export interface PagedMembersResponse{
 
 export interface LoginResponse{
     token: string,
-    role: string,
+    role: string[],
     email: string,
     fullName: string,
     department: string,
@@ -235,15 +235,17 @@ export interface getMemberResponse {
     dateJoined: string;
     jobTitle?: string;
     department: string;
-    departmentId: number; // NEW — confirm backend's GetMembers query selects this
-    role: string;         // NEW — confirm backend's GetMembers query selects this
+    departmentId: number;
+    primaryRole: string;
+    secondaryRoles: string[]; 
 }
 
 export interface UpdateMemberDto {
     firstName?: string;
     lastName?: string;
     jobTitle?: string;
-    role?: string;
+    primaryRole: string;
+    secondaryRoles: string[]
     departmentId?: number;
 }
 
@@ -372,3 +374,26 @@ export interface UpdateTaskProgressPayload{
     taskId: string,
     progress: number,
 } 
+
+// types/types.ts
+export const NotificationType = {
+    Info: "info",
+    Warning: "warning",
+    Announcement: "announcement",
+    Important: "important",
+} as const;
+export type NotificationTypeValue = (typeof NotificationType)[keyof typeof NotificationType];
+
+export interface NotificationResponseDto {
+    id: string;
+    title: string;
+    message: string;
+    type: NotificationTypeValue;
+    createdByName: string;
+    createdAt: string;
+    isRead: boolean;
+    attachmentFileName?: string;
+    attachmentBlobName?: string;
+    attachmentContentType?: string;
+    attachmentFileSizeBytes?: number;
+}

@@ -1,5 +1,5 @@
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { updateMember, deleteMember } from "../api/adminApi";
+import { updateMember, deleteMember, assignRole, removeRole } from "../api/adminApi";
 import toast from "react-hot-toast";
 
 export const useUpdateMember = () => {
@@ -17,5 +17,21 @@ export const useDeleteMember = () => {
         mutationFn: deleteMember,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["members"] }),
         onError: (error) => toast.error(`${error.message}`),
+    });
+};
+
+export const useAssignRole = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: assignRole,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["members"] }),
+    });
+};
+
+export const useRemoveRole = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: removeRole,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["members"] }),
     });
 };

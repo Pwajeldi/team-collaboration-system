@@ -44,18 +44,38 @@ namespace backend.Controllers
             var query = _userManager.Users.Include(m => m.Department).ApplyMemberQueryFilters(filter).OrderBy(m => m.Email);
             var totalMembers = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalMembers/(double)pageSize);
+            var pagedMembers = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var memberIds = pagedMembers.Select(m => m.Id).ToList();
             if (page > totalPages && totalPages > 0) page = totalPages;
-            var items = await query.Select(m => new GetMemberResponse
+            var roleAssignments = await (
+                from ur in _context.UserRoles
+                join r in _context.Roles on ur.RoleId equals r.Id
+                where memberIds.Contains(ur.UserId)
+                select new { ur.UserId, RoleName = r.Name! }
+            ).ToListAsync();
+
+            var rolesByUser = roleAssignments
+                .GroupBy(x => x.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.RoleName.ToLowerInvariant()).ToList());
+
+            var items = pagedMembers.Select(m =>
             {
-                FirstName = m.FirstName,
-                LastName = m.LastName,
-                MemberId = m.Id,
-                Email = m.Email!,
-                DateJoined = m.DateJoined,
-                JobTitle = m.JobTitle!,
-                Department = m.Department.DepartmentName,
-                ProfilePictureUrl = "",//I'll get back to you too
-            }).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+                var userRoles = rolesByUser.GetValueOrDefault(m.Id, []);
+                return new GetMemberResponse
+                {
+                    MemberId = m.Id,
+                    FirstName = m.FirstName,
+                    LastName = m.LastName,
+                    Email = m.Email!,
+                    DateJoined = m.DateJoined,
+                    JobTitle = m.JobTitle!,
+                    Department = m.Department.DepartmentName,
+                    DepartmentId = m.DepartmentId,
+                    PrimaryRole = userRoles.FirstOrDefault(r => Roles.PrimaryRoles.Contains(r)) ?? string.Empty,
+                    SecondaryRoles = userRoles.Where(r => Roles.SecondaryRoles.Contains(r)).ToList(),
+                };
+            }).ToList();
+
             var hasNextPage = page < totalPages;
             var response = new PaginatedResponse<GetMemberResponse>
             {
@@ -77,6 +97,7 @@ namespace backend.Controllers
         {
             var member = await _userManager.Users.Include(u => u.Department).FirstOrDefaultAsync(u => u.Id == id);
             if (member == null) return Unauthorized();
+            var userRoles = (await _userManager.GetRolesAsync(member)).Select(r => r.ToLowerInvariant()).ToList();
             var response = new GetMemberResponse
             {
                 FirstName = member.FirstName,
@@ -86,6 +107,8 @@ namespace backend.Controllers
                 DateJoined = member.DateJoined,
                 JobTitle = member.JobTitle!,
                 Department = member.Department.DepartmentName,
+                PrimaryRole = userRoles.FirstOrDefault(r => Roles.PrimaryRoles.Contains(r)) ?? string.Empty,
+                SecondaryRoles = userRoles.Where(r => Roles.SecondaryRoles.Contains(r)).ToList(),
                 ProfilePictureUrl = string.Empty // I'll get back to you
             };
             return Ok(response);
@@ -124,17 +147,39 @@ namespace backend.Controllers
             if (dto.LastName != null) member.LastName = dto.LastName;
             if (dto.JobTitle != null) member.JobTitle = dto.JobTitle;
             if (dto.DepartmentId.HasValue) member.DepartmentId = dto.DepartmentId ?? 0;
-            if (dto.Role != null)
+            if (dto.PrimaryRole is null)
             {
-                var lowercase = dto.Role.ToLower();
-                string[] roles = [Roles.Admin, Roles.Manager, Roles.Regular];
-                if (!roles.Contains(lowercase))
-                {
-                   return BadRequest(new { message = "Invalid role" });
-                }
-                await _userManager.AddToRoleAsync(member, lowercase);
+                return BadRequest("User must have a primary role");
             }
-
+            var primaryRole = dto.PrimaryRole.Trim().ToLowerInvariant();
+            if (!Roles.PrimaryRoles.Contains(primaryRole)) return BadRequest("Invalid primary role");
+            var currentUserRoles = await _userManager.GetRolesAsync(member);
+            var currentPrimaryRole = currentUserRoles.FirstOrDefault(role => Roles.PrimaryRoles.Contains(role));
+            if(currentPrimaryRole != primaryRole)
+            {
+                if(currentPrimaryRole is not null)
+                {
+                    await _userManager.RemoveFromRoleAsync(member, currentPrimaryRole);
+                }
+                await _userManager.AddToRoleAsync(member, primaryRole);
+            }
+            var secondaryRoles = dto.SecondaryRoles.Select(r => r.Trim().ToLowerInvariant()).Distinct().ToList();
+            if(secondaryRoles.Any(role => !Roles.SecondaryRoles.Contains(role)))
+            {
+                return BadRequest("One or more secondary roles are invalid");
+            }
+            var currentSecondaryRoles = currentUserRoles.Where(role => Roles.SecondaryRoles.Contains(role)).ToHashSet();
+            var desiredSecondaryRoles = secondaryRoles.ToHashSet();
+            var rolesToRemove = currentSecondaryRoles.Except(desiredSecondaryRoles);
+            var rolesToAdd = desiredSecondaryRoles.Except(currentSecondaryRoles);
+            foreach(var role in rolesToRemove)
+            {
+                await _userManager.RemoveFromRoleAsync(member, role);
+            }
+            foreach(var role in rolesToAdd)
+            {
+                await _userManager.AddToRoleAsync(member, role);
+            }
             var result = await _userManager.UpdateAsync(member);
             return result.Succeeded ? Ok() : BadRequest(new { message = "Failed to update member" });
         }

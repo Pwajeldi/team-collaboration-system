@@ -77,3 +77,18 @@ export const uploadProfilePicture = async(image: File) => {
         }
     }
 }
+
+export const fetchUserProfile = async(userId: string) => {
+    try{
+        var response = await api.get<UserProfileResponse>(`/profile/${userId}`);
+        return response.data;
+    }
+    catch(error: unknown){
+        if(axios.isAxiosError(error)){
+            throw new Error(error.response?.data)
+        }else{
+            throw new Error(error as string)
+        }
+    }
+    
+}

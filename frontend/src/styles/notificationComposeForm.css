@@ -1,0 +1,112 @@
+/* notificationComposeForm.css */
+.notif-compose-card {
+    background: var(--color-surface);
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-width: 700px;
+    box-shadow: var(--shadow);
+}
+
+.notif-compose-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+}
+
+.notif-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.notif-form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.notif-form-group input,
+.notif-form-group textarea {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.notif-form-group input:focus,
+.notif-form-group textarea:focus {
+    border-color: var(--color-primary);
+}
+
+.notif-field-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.notif-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.notif-type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.notif-type-option.selected {
+    border-color: var(--color-primary);
+    background: #f0f0fb;
+}
+
+.notif-type-option.type-info svg { color: var(--color-inProgress); }
+.notif-type-option.type-warning svg { color: #d97706; }
+.notif-type-option.type-announcement svg { color: var(--color-primary); }
+.notif-type-option.type-important svg { color: var(--color-severe); }
+
+.notif-attach-dropzone {
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-compose-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.notif-send-btn {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.notif-send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
