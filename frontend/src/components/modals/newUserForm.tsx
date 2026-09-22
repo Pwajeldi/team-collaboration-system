@@ -19,10 +19,10 @@ const NewUserForm = ({ onSuccess, onClose }: ShowUserFormProps) => {
     const departmentsQuery = useFetchDepartments();
 
     const userSchema = z.object({
-        firstName: z.string().min(2),
-        lastName: z.string().min(2),
-        email: z.email(),
-        jobTitle: z.string(),
+        firstName: z.string().min(2, "Required field"),
+        lastName: z.string().min(2, "Required field"),
+        email: z.email("Required field"),
+        jobTitle: z.string("Required field"),
         department: z.int().positive("Select a department"),
         role: z.string(),
     })

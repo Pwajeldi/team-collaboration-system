@@ -13,10 +13,10 @@ type TaskFormModalProps = {
 
 const taskSchema = z.object({
     title: z.string().min(2, "Title is too short"),
-    description: z.string(),
-    assigneeId: z.string().min(1, "Select someone to assign this to"),
+    description: z.string("Required field"),
+    assigneeId: z.string().min(1, "Select assignee"),
     priority: z.enum([TaskPriority.Low, TaskPriority.Medium, TaskPriority.High]),
-    dueDate: z.string(),
+    dueDate: z.string("Invalid date"),
 });
 
 const TaskFormModal = ({ task, onClose, onSuccess }: TaskFormModalProps) => {

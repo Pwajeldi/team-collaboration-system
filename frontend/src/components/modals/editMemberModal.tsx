@@ -16,10 +16,10 @@ type EditMemberModalProps = {
 const PRIMARY_ROLES = ["admin", "manager", "regular"] as const;
 
 const editSchema = z.object({
-    firstName: z.string().min(2),
-    lastName: z.string().min(2),
+    firstName: z.string().min(2, "Required field"),
+    lastName: z.string().min(2, "Required field"),
     jobTitle: z.string(),
-    department: z.number().int().positive(),
+    department: z.number().int().positive("Select department"),
     primaryRole: z.enum(PRIMARY_ROLES),
     secondaryRoles: z.array(z.string()),
 });
