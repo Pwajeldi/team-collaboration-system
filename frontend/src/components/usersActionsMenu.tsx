@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ActionButton from "./actionsButton"
 import { Eye, MessageCircleMore } from "lucide-react";
 import { useNavigate } from "react-router";
@@ -16,13 +16,27 @@ const UserActionsMenu = ({user}:{user:selectedUser}) => {
         navigate("/chat");
     };
     const [showProfile, setShowProfile] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    const handleClickOutside = (event: MouseEvent) => {
+        if (menuRef.current && !menuRef.current.contains(event.target as Node)){
+            setOpen(false);
+        }
+    }
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+    }, [])
 
     return(
     <>
         <div className="user-actions-menu">
             <ActionButton onClick={SwitchOpenState}/>
             {open && (
-                <div className="user-actions-dropdown">
+                <div className="user-actions-dropdown" ref={menuRef}>
                     <button className="user-actions-dropdown-item" onClick={() => GoToChat(user)}>
                         <MessageCircleMore size={14}/> Chat
                     </button>

@@ -47,6 +47,7 @@ const AdminUsersTable = ({ onEdit }: AdminUsersTableProps) => {
         search: globalFilter,
         departmentId: departmentFilter,
         jobTitle: "",
+        role: roleFilter,
     });
     const deactivateMember = useDeactivateMember();
     const activateMember = useActivateMember();

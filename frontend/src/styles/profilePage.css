@@ -17,6 +17,9 @@
 
 .profile-page-title{
     grid-area: profile-page-title;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .profile-overview{

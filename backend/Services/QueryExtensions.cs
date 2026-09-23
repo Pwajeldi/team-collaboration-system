@@ -1,5 +1,6 @@
 ﻿using backend.Dtos;
 using backend.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace backend.Services
 {
@@ -33,6 +34,10 @@ namespace backend.Services
             {
                 query = query.Where(u =>
                     u.IsActive == filters.IsActive);
+            }
+            if (!string.IsNullOrWhiteSpace(filters.Role))
+            {
+                query = query.Where(u => u.UserProfile.Role.Contains(filters.Role));
             }
 
             return query;

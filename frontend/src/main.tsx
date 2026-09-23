@@ -9,7 +9,7 @@ import { ChatContextProvider } from './contexts/chatContext.tsx'
 const queryClient = new QueryClient({
   defaultOptions:{
     queries:{
-      staleTime: 60_000,
+      staleTime: 180_000,
     }
   }
 });

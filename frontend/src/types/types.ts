@@ -256,6 +256,7 @@ export interface MemberQueryParams {
     departmentId?: number;
     jobTitle?: string;
     isActive?: boolean;
+    role?: string;
 }
 
 export interface TaskSummaryResponse{

@@ -42,7 +42,7 @@ namespace backend.Controllers
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;
             var isAdmin = User.IsInRole(Roles.Admin);
-            var query = _userManager.Users.Include(m => m.Department).ApplyMemberQueryFilters(filter).OrderBy(m => m.Email);
+            var query = _userManager.Users.Include(m => m.Department).Include(m => m.UserProfile).ApplyMemberQueryFilters(filter).OrderBy(m => m.Email);
             if (!isAdmin)
             {
                 query = query.Where(u => u.IsActive).OrderBy(m => m.Email);

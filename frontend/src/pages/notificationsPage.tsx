@@ -6,6 +6,7 @@ import NotificationComposeForm from "../components/notificationComposeForm";
 import Loader from "../components/loader";
 import type { NotificationResponseDto } from "../types/types";
 import "../styles/notificationsPage.css";
+import NotificationModal from "../components/modals/notificationModal";
 
 const typeIconClass: Record<string, string> = {
     info: "notif-icon-info",
@@ -21,6 +22,8 @@ const NotificationsPage = () => {
     const markRead = useMarkNotificationRead();
     const [tab, setTab] = useState<"send" | "view">(canBroadcast ? "send" : "view");
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [openNotifModal, setOpenNotifModal] = useState(false);
+    const [selectedNotif, setSelectedNotif] = useState<NotificationResponseDto>();
 
     const handleExpand = (n: NotificationResponseDto) => {
         setExpandedId((prev) => (prev === n.id ? null : n.id));
@@ -46,7 +49,12 @@ const NotificationsPage = () => {
                 <div className="notifications-list">
                     {query.data?.length === 0 && <p className="notifications-empty">No notifications yet.</p>}
                     {query.data?.map((n) => (
-                        <div key={n.id} className={`notification-card ${!n.isRead ? "unread" : ""}`} onClick={() => handleExpand(n)}>
+                        <div key={n.id} className={`notification-card ${!n.isRead ? "unread" : ""}`} onClick={() => {
+                            handleExpand(n);
+                            setSelectedNotif(n);
+                            setOpenNotifModal(true)
+                            }
+                            }>
                             <div className={`notification-icon ${typeIconClass[n.type]}`}>
                                 <Bell size={16} />
                             </div>
@@ -62,6 +70,10 @@ const NotificationsPage = () => {
                     ))}
                 </div>
             )}
+                <NotificationModal 
+                showNotif={openNotifModal} 
+                onClose={()=>setOpenNotifModal(false)} 
+                notification={selectedNotif}/>
         </div>
     );
 };

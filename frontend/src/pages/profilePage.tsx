@@ -123,6 +123,9 @@ const MyProfile = () => {
         <div className="profile-page">
             <div className="profile-page-title">
                 <h1>Profile & Settings</h1>
+                <button onClick={handleUpdateProfile} className="update-profile-btn">
+                    {updateProfile.isPending ? <Loader size="sm" fullHeight={false}/> : <span>Update profile</span>}
+                </button>
             </div>
 
             <div className="profile-overview">
@@ -171,9 +174,6 @@ const MyProfile = () => {
             <div className="personal-info">
                 <div className="personal-info-header">
                     <h3>Personal Information</h3>
-                    <button onClick={handleUpdateProfile} className="update-profile-btn">
-                        {updateProfile.isPending ? <Loader size="sm" fullHeight={false}/> : <span>Update profile</span>}
-                    </button>
                 </div>
 
                 <div className="personal-info-input-group">

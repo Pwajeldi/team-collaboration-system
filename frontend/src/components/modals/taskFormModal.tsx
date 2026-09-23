@@ -4,12 +4,22 @@ import { X } from "lucide-react";
 import { TaskPriority, type TaskResponse } from "../../types/types";
 import { useCreateTask, useUpdateTask, useGetAssignableMembers } from "../../hooks/taskHook";
 import "../../styles/taskFormModal.css";
+import { useRef } from "react";
 
 type TaskFormModalProps = {
     task?: TaskResponse;
     onClose: () => void;
     onSuccess: () => void;
 };
+
+const dateOption: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    hour12: true,
+    minute: "2-digit"
+} 
 
 const taskSchema = z.object({
     title: z.string().min(2, "Title is too short"),
@@ -24,6 +34,7 @@ const TaskFormModal = ({ task, onClose, onSuccess }: TaskFormModalProps) => {
     const membersQuery = useGetAssignableMembers();
     const createTask = useCreateTask();
     const updateTask = useUpdateTask();
+    const dueDateRef = useRef<HTMLInputElement>(null);
 
     const isSubmitting = createTask.isPending || updateTask.isPending;
 
@@ -159,6 +170,14 @@ const TaskFormModal = ({ task, onClose, onSuccess }: TaskFormModalProps) => {
                                     type="date"
                                     value={field.state.value}
                                     onChange={(e) => field.handleChange(e.target.value)}
+                                    className="hidden-date-input"
+                                    hidden={true}
+                                    ref={dueDateRef}
+                                />
+                                <input type="text" 
+                                    readOnly={true} 
+                                    onClick={()=>dueDateRef.current?.showPicker()} 
+                                    value={new Date(field.state.value!).toLocaleDateString("en-us", dateOption)}
                                 />
                                 {field.state.meta.errors.length > 0 && (
                                     <span className="field-error">{field.state.meta.errors[0]?.message}</span>

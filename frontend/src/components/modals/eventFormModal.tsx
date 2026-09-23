@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { X, Search } from "lucide-react";
@@ -13,6 +13,15 @@ type EventFormModalProps = {
     initialEnd?: string;
     onClose: () => void;
 };
+
+const dateOption: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    hour12: true,
+    minute: "2-digit"
+} 
 
 const eventSchema = z.object({
     title: z.string().min(2, "Title is too short"),
@@ -39,6 +48,8 @@ const EventFormModal = ({ initialStart, initialEnd, onClose}: EventFormModalProp
     const usersQuery = useGetUsers();
     const createEvent = useCreateEvent();
     const [attendeeSearch, setAttendeeSearch] = useState("");
+    const startRef = useRef<HTMLInputElement>(null);
+    const endRef = useRef<HTMLInputElement>(null);
 
     const form = useForm({
         defaultValues: {
@@ -158,7 +169,14 @@ const EventFormModal = ({ initialStart, initialEnd, onClose}: EventFormModalProp
                                             type="datetime-local"
                                             value={field.state.value}
                                             onChange={(e) => field.handleChange(e.target.value)}
+                                            hidden={true}
+                                            ref={startRef}
+                                            className="hidden-date-input"
                                         />
+                                        <input type="text" 
+                                        readOnly={true} 
+                                        onClick={()=>startRef.current?.showPicker()} 
+                                        value={new Date(field.state.value).toLocaleDateString("en-us", dateOption)}/>
                                         {field.state.meta.errors.length > 0 && (
                                             <span className="field-error">{field.state.meta.errors?.map((error, index) => (<p key={index}>{error?.message}</p>))}</span>
                                         )}
@@ -176,6 +194,14 @@ const EventFormModal = ({ initialStart, initialEnd, onClose}: EventFormModalProp
                                             type="datetime-local"
                                             value={field.state.value}
                                             onChange={(e) => field.handleChange(e.target.value)}
+                                            hidden={true}
+                                            ref={endRef}
+                                            className="hidden-date-input"
+                                        />
+                                        <input type="text" 
+                                            readOnly={true} 
+                                            onClick={()=>endRef.current?.showPicker()} 
+                                            value={new Date(field.state.value).toLocaleDateString("en-us", dateOption)}
                                         />
                                         {field.state.meta.errors.length > 0 && (
                                             <span className="field-error">{field.state.meta.errors?.map((error, index) => (<p key={index}>{error?.message}</p>))}</span>
