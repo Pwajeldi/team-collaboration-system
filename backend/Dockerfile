@@ -2,10 +2,10 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
-USER $APP_UID
+# USER $APP_UID
 WORKDIR /app
-ENV ASPNETCORE_HTTP_PORTS=4000
-EXPOSE 4000
+ENV ASPNETCORE_HTTP_PORTS=10000
+EXPOSE 10000
 
 
 # This stage is used to build the service project
