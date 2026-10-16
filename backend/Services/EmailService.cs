@@ -3,6 +3,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
+using System.Net.Sockets;
 
 namespace backend.Services
 {
@@ -12,6 +13,24 @@ namespace backend.Services
         Task SendEventInvite(TeamMember recipient, Event calendarEvent, bool hadOverlapAtCreation, CancellationToken ct = default);
         Task SendEventCancelledEmail(TeamMember recipient, string eventTitle, DateTime eventStart, CancellationToken ct = default);
         Task SendForgotPasswordUrl(string userEmail, string resetToken, string userName, CancellationToken ct = default);
+    }
+
+    public static class EmailRetry
+    {
+        public const int MaxRetries = 3;
+
+        public static bool IsTransient(Exception ex)
+        {
+            return ex switch
+            {
+                TimeoutException => true,
+                IOException => true,
+                SocketException => true,
+                SmtpProtocolException => true,
+                SmtpCommandException cmd => (int)cmd.StatusCode is >= 400 and < 500,
+                _ => false,
+            };
+        }
     }
     public class EmailService : IEmailService
     {

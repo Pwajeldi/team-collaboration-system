@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
+using System.Runtime.InteropServices;
 
 namespace backend.Services
 {
@@ -131,6 +132,26 @@ namespace backend.Services
                         try
                         {
                             await emailService.SendEmailToNewUser(teamMember.Email, $"{teamMember.FirstName} {teamMember.LastName}", resetToken, ct);
+                        }
+                        catch(Exception ex) when (EmailRetry.IsTransient(ex))
+                        {
+                            _logger.LogWarning(ex, "Transient error occurred while sending email to new user - {Email}", dto.Email);
+                            await Task.Run(async () =>
+                            {
+                                await Task.Delay(20000);
+                                try
+                                {
+                                    await _queue.QueueAsync(async(serviceProvider, ct) =>
+                                    {
+                                        var emailService = serviceProvider.GetRequiredService<IEmailService>();
+                                        await emailService.SendEmailToNewUser(teamMember.Email, $"{teamMember.FirstName} {teamMember.LastName}", resetToken, ct);
+                                    });
+                                }
+                                catch (Exception retryEx)
+                                {
+                                    _logger.LogError(retryEx, "Retry failed to send email to new user - {Email}", dto.Email);
+                                }
+                            });    
                         }
                         catch (Exception ex)
                         {
